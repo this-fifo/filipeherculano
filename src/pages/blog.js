@@ -23,7 +23,6 @@ const Post = styled.div`
 `
 
 const Blog = ({ data }) => {
-  console.log(data)
   return (
     <>
       <SEO title="Blog" />
