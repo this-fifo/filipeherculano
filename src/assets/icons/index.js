@@ -1,4 +1,4 @@
 import ArrowBack from './ArrowBack.svg'
-import Favicon from './Favicon.png'
+import favicon from './favicon.png'
 
-export { ArrowBack, Favicon }
+export { ArrowBack, favicon }

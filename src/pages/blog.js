@@ -26,7 +26,7 @@ const Blog = ({ data }) => {
   console.log(data)
   return (
     <>
-      <SEO title="fifo's blog" />
+      <SEO title="Blog" />
       <HeaderLogo />
       <Layout>
         {data.allMarkdownRemark.edges.map(({ node }) => (

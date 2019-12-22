@@ -2,7 +2,7 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { useStaticQuery, graphql } from 'gatsby'
 
-import { Favicon } from '../assets/icons'
+import { favicon } from '../assets/icons'
 
 export const SEO = ({ title }) => {
   const data = useStaticQuery(
@@ -49,7 +49,7 @@ export const SEO = ({ title }) => {
           content: `summary`,
         },
       ]}
-      link={[{ rel: 'icon', type: 'image/png', href: `${Favicon}` }]}
+      link={[{ rel: 'icon', type: 'image/png', href: `${favicon}` }]}
     />
   )
 }
