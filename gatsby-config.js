@@ -50,6 +50,14 @@ module.exports = {
               linkImagesToOriginal: false,
             },
           },
+          {
+            resolve: `gatsby-remark-prismjs`,
+            options: {
+              showLineNumbers: true,
+              noInlineHighlight: false,
+            },
+          },
+          `gatsby-remark-copy-linked-files`,
         ],
       },
     },

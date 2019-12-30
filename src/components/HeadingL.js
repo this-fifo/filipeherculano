@@ -8,7 +8,7 @@ export const HeadingL = styled.h2`
   letter-spacing: -1.5px;
   line-height: 1.2;
   margin-bottom: 2.5vh;
-  font-family: 'Kaushan Script', cursive;
+  font-family: 'Junge', serif;
 
   @media (max-width: ${BREAKPOINT}px) {
     font-size: 30px;

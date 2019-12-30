@@ -17,19 +17,17 @@ export const GlobalStyles = createGlobalStyle`
 
   @font-face {
     font-display: block;
-    font-family: "IBMPlexMono";
-    font-style: normal;
+    font-family: "Raleway";
+    src: url('${font.RalewayRegular}');
     font-weight: 400;
-    src: url('${font.IBMPlexMono400}') format("woff2");
-  }
+  } 
 
   @font-face {
     font-display: block;
-    font-family: "IBMPlexMono";
-    font-style: normal;
-    font-weight: 700;
-    src: url('${font.IBMPlexMono700}') format("woff2");
-  }
+    font-family: "Junge";
+    src: url('${font.JungeRegular}');
+    font-weight: 400;
+  } 
 
   @font-face {
     font-display: block;
@@ -38,10 +36,14 @@ export const GlobalStyles = createGlobalStyle`
     font-weight: 400;
   }
 
+  h1, h2, h3, h4, h5 {
+    font-family: 'Junge', serif;
+  }
+
   body {
     background-color: var(--light-color);
     color: var(--dark-color);
-    font-family: 'IBMPlexMono', sans-serif;
+    font-family: 'Raleway', sans-serif;
     font-size: 19px;
     font-weight: 400;
     height: 100%;

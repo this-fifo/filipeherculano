@@ -37,9 +37,9 @@ export const Layout = ({ children, styles }) => {
 
   const style = styles
     ? {
-        color: 'whitesmoke',
-        mixBlendMode: 'difference',
-      }
+      color: 'whitesmoke',
+      mixBlendMode: 'difference',
+    }
     : {}
   return (
     <>

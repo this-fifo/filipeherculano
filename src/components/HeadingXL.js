@@ -12,7 +12,7 @@ export const HeadingXL = styled.h1`
     hsl(240, 100%, 70%)
   );
   display: block;
-  font-family: 'Kaushan Script', cursive;
+  font-family: 'Junge', serif;
   font-size: 100px;
   letter-spacing: -4px;
   line-height: 1.2;
