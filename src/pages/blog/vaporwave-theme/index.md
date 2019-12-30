@@ -1,8 +1,8 @@
 ---
-title: 'Customizing vscode'
+title: 'Customizing vscode’s theme'
 date: '2019-12-24'
 image: 'https://source.unsplash.com/150x150/?code'
-excerpt: I ended up creating my own theme
+excerpt: Created my own custom theme, you should do the same
 ---
 
 <p align="center">
