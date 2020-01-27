@@ -5,7 +5,8 @@ import { BREAKPOINT } from '../utils/constants'
 
 export const GlobalStyles = createGlobalStyle`
   :root {
-    --accent-color: hsla(197, 100%, 55%);
+    /* --accent-color: hsla(197, 100%, 55%); */
+    --accent-color: #bfb2ef;
     --dark-color: hsl(0, 0%, 15%);
     --dark-color-light: hsla(0, 0%, 15%, 0.9);
     --dark-color-lighter: hsla(00, 0%, 15%, 0.7);
@@ -14,6 +15,16 @@ export const GlobalStyles = createGlobalStyle`
     --sides-padding-desktop: 3%;
     --sides-padding-mobile: 5%;
   }
+
+  [data-theme="dark"] {
+    --accent-color: #bfb2ef;
+    --dark-color: hsl(0, 0%, 99%);
+    --dark-color-light: hsla(0, 0%, 99%, 0.9);
+    --dark-color-lighter: hsla(0, 0%, 99%, 0.92);
+    --light-color: hsl(0, 0%, 15%);
+    --light-color-translucent: hsla(0, 0%, 15%, 0.9);
+  }
+
 
   @font-face {
     font-display: block;

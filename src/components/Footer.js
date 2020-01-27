@@ -23,6 +23,9 @@ export const Footer = () => {
       <Link to="/blog">
         <p>blog</p>
       </Link>
+      <Link to="/about">
+        <p>about</p>
+      </Link>
       <ButtonLink
         href="https://github.com/this-fifo"
         target="_blank"

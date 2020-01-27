@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { createRef } from 'react'
 import { Link } from 'gatsby'
 import styled from 'styled-components'
 
 import { FixedBar } from '../components'
+import { ThemeToggle } from './ThemeToggle'
 import { BREAKPOINT } from '../utils/constants'
-import { ArrowBack } from '../assets/icons'
+import { WhiteArrowBack } from '../assets/icons'
 
 const Icon = styled.img`
   height: 34px;
@@ -19,11 +20,14 @@ const Icon = styled.img`
 `
 
 export const HeaderBack = () => {
+  const ref = createRef()
+
   return (
-    <FixedBar>
+    <FixedBar style={{ justifyContent: 'space-between' }}>
       <Link to="/">
-        <Icon src={ArrowBack} alt="Back" />
+        <Icon ref={ref} src={WhiteArrowBack} alt="Back" />
       </Link>
+      <ThemeToggle arrow={ref} />
     </FixedBar>
   )
 }

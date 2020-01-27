@@ -32,14 +32,15 @@ export const Layout = ({ children, styles }) => {
       document.body.style.backgroundRepeat = 'no-repeat'
       document.body.style.backgroundPosition = 'center center'
       document.body.style.backgroundSize = 'cover'
+      document.body.style.backgroundBlendMode = 'multiply'
     }
   }, [styles])
 
   const style = styles
     ? {
-      color: 'whitesmoke',
-      mixBlendMode: 'difference',
-    }
+        color: 'whitesmoke',
+        mixBlendMode: 'difference',
+      }
     : {}
   return (
     <>
