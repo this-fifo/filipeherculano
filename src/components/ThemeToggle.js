@@ -22,11 +22,9 @@ export const ThemeToggle = ({ arrow }) => {
   }
 
   useLayoutEffect(() => {
-    const theme = localStorage.getItem('theme')
-    if (theme) {
-      document.documentElement.setAttribute('data-theme', theme)
-      setToggle(theme === 'dark' ? true : false)
-    }
+    const theme = localStorage.getItem('theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', theme)
+    setToggle(theme === 'dark' ? true : false)
     if (arrow && arrow.current) {
       arrow.current.src = toggle ? WhiteArrowBack : DarkArrowBack
     }
