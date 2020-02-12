@@ -6,7 +6,7 @@ import { BREAKPOINT } from '../utils/constants'
 export const GlobalStyles = createGlobalStyle`
   :root {
     /* --accent-color: hsla(197, 100%, 55%); */
-    --accent-color: #bfb2ef;
+    --accent-color: tomato;
     --dark-color: hsl(0, 0%, 15%);
     --dark-color-light: hsla(0, 0%, 15%, 0.9);
     --dark-color-lighter: hsla(00, 0%, 15%, 0.7);
@@ -17,7 +17,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   [data-theme="dark"] {
-    --accent-color: #bfb2ef;
+    --accent-color: lightyellow;
     --dark-color: hsl(0, 0%, 99%);
     --dark-color-light: hsla(0, 0%, 99%, 0.9);
     --dark-color-lighter: hsla(0, 0%, 99%, 0.92);
@@ -67,10 +67,9 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   div a {
-    text-decoration: none;
-    color: inherit;
-    -webkit-tap-highlight-color: hsla(0, 0%, 0%, 0);
-    -webkit-tap-highlight-color: transparent;
+    color: var(--accent-color);
+    text-decoration: underline;
+    text-decoration-skip-ink: auto;
   }
 
   /* CSS Reset */
@@ -98,9 +97,10 @@ export const GlobalStyles = createGlobalStyle`
     list-style: none;
   }
 
-  /* A elements that don't have a class get default styles */
-  a:not([class]) {
-    text-decoration-skip-ink: auto;
+  /* A elements that have a class get default styles */
+  a[class] {
+    color: inherit;
+    text-decoration: none;
   }
 
   /* Make images easier to work with */

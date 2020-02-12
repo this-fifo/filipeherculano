@@ -29,7 +29,7 @@ const Blog = ({ data }) => {
       <HeaderLogo />
       <Layout>
         {data.allMarkdownRemark.edges.map(({ node }) => (
-          <Link to={node.fields.slug} key={node.id}>
+          <Link to={node.fields.slug} key={node.id} className="blog-entry">
             <Post>
               <HeadingL>{node.frontmatter.title}</HeadingL>
               <TextBody>{node.frontmatter.excerpt || node.excerpt}</TextBody>

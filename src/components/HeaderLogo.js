@@ -23,7 +23,7 @@ const Logo = styled.p`
 export const HeaderLogo = () => {
   return (
     <HeaderWrapper>
-      <Link to="/">
+      <Link to="/" className="logo-link">
         <Logo>Fifo</Logo>
       </Link>
       <ThemeToggle />

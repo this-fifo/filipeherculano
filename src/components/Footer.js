@@ -20,10 +20,10 @@ const Container = styled.footer`
 export const Footer = () => {
   return (
     <Container>
-      <Link to="/blog">
+      <Link to="/blog" className="blog-link">
         <p>blog</p>
       </Link>
-      <Link to="/about">
+      <Link to="/about" className="about-link">
         <p>about</p>
       </Link>
       <ButtonLink
