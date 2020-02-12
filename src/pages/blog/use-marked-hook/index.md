@@ -19,9 +19,9 @@ Here's what I needed to do:
 - Parse a markdown string
 - Sanitize that string to prevent [XSS](https://owasp.org/www-community/attacks/xss/) attacks
 
-Apparently, [there seems to be a vast number of parsers out there](https://github.com/search?q=markdown+parser), I decided to go with [marked](https://github.com/markedjs/marked) which seems like a good library with an active community and a nice and simple implementation
+Apparently, [there is a vast number of parsers out there](https://github.com/search?q=markdown+parser), I decided to go with [marked](https://github.com/markedjs/marked) which seems like a good library with an active community and a nice and simple implementation
 
-Again, the same could be said for sanitizing html _(for some reason people just like writing parsers a lot)_ so I picked sanitize-html which seemed to offer a nice level of configuration through a simple object
+Again, the same could be said for sanitizing html _(for some reason people just like writing parsers a lot)_, so I picked sanitize-html which offers a nice level of configuration through a simple object
 
 ## Setup
 
@@ -49,7 +49,7 @@ Will output this html!
 <p><a href="#heading" title="heading">link</a></p>
 ```
 
-As said before, to prevent XSS, let's add this before using the html
+Now, to prevent XSS, let's add this before using the html
 
 ```js
 // sanitizing raw html with sanitize-html
@@ -65,7 +65,7 @@ heading
 <p><a href="#heading" title="heading">link</a></p>
 ```
 
-Wait, what? Where's our h1 tag? Well, apparently the default options for sanitize-html consider h1 unsafe (I guess), they go over the specs in their [README](https://github.com/apostrophecms/sanitize-html/blob/master/README.md) so I went and added my custom defaults which look like this
+Wait, what? Where's our h1 tag? Well, apparently the default options for sanitize-html consider h1 unsafe (I guess), they go over the specs in their [README](https://github.com/apostrophecms/sanitize-html/blob/master/README.md) so I went and added my custom defaults which looks like this
 
 <details>
   <summary>View defaults</summary>
@@ -193,7 +193,7 @@ describe('useMarked', () => {
 })
 ```
 
-Note the newline character added at the end of the output (jest errors were very unhelpful in seeing that and it took me quite a bit to realize tests were failing because of that 🤦‍♂️)
+**⚠️ Note the newline character added at the end of the output (_jest errors were very unhelpful in seeing that and it took me quite a bit to realize tests were failing because of it_ 🤦‍♂️)**
 
 ## Conclusion
 
@@ -205,4 +205,4 @@ yarn add use-marked-hook
 
 I made the code for it available on [github](https://github.com/this-fifo/use-marked-hook)
 
-It also includes a sample react app that uses useMarked hook to render a local markdown file into an html page that is later published live through github pages which you can find [here](https://this-fifo.github.io/use-marked-hook/)
+It also includes a sample react app that uses useMarked hook to render a local markdown file into an html page that is later published live through github pages, checkout the result [here](https://this-fifo.github.io/use-marked-hook/)
