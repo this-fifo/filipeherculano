@@ -177,7 +177,7 @@ const App = () => {
 
 ## Testing Custom Hooks
 
-I also found that there's a quick way to test your hooks using the [@testing-library/react-hooks](https://www.npmjs.com/package/react-hooks-testing-library) package which provide us with the nice renderHook helper
+I also found that there's a quick way to test your hooks using the [@testing-library/react-hooks](https://www.npmjs.com/package/@testing-library/react-hooks) package which provide us with the nice renderHook helper
 
 Testing our useMarked hook looks like this
 
