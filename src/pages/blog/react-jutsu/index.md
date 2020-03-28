@@ -20,6 +20,8 @@ I decided to use that in a React project I am currently working on and made that
 
 You can see a live demo using the public jitsi domain [here](https://this-fifo.github.io/jutsu/)
 
+*Note: this is intended to be used on the desktop browser for now, to join a Jitsi room on mobile you will need their app, although checkout [this PR](https://github.com/jitsi/jitsi-meet/pull/3518) for more information*
+
 ## How to use it
 
 ```bash
