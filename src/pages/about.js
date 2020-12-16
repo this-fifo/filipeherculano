@@ -29,9 +29,18 @@ const About = () => {
             >
               <u>work</u>
             </a>{' '}
-            as a Software Engineer III at{' '}
+            as a Senior Software Engineer at{' '}
             <a
-              data-tooltip="help us make healthcare better"
+              data-tooltip="Building next-generation market intelligence for cannabis"
+              href="https://www.linkedin.com/company/pistil-data"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <u>Pistil Data</u>
+            </a>{' '}
+            previously, I worked as a Software Engineer III at{' '}
+            <a
+              data-tooltip="Help Phreesia make healthcare better"
               href="https://www.phreesia.com/company/careers/"
               rel="noopener noreferrer"
               target="_blank"
