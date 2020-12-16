@@ -37,8 +37,8 @@ const About = () => {
               target="_blank"
             >
               <u>Pistil Data</u>
-            </a>{' '}
-            previously, I worked as a Software Engineer III at{' '}
+            </a>
+            . Previously, I worked as a Software Engineer III at{' '}
             <a
               data-tooltip="Help Phreesia make healthcare better"
               href="https://www.phreesia.com/company/careers/"
