@@ -17,7 +17,7 @@ There are beautiful themes out there for it already, but I could never find one 
 I am particularly fond of the Snazzy colors on iTerm2
 
 <p align="center">
-    <img src="https://github.com/sindresorhus/iterm2-snazzy/raw/master/screenshot.png"/>
+    <img src="https://github.com/sindresorhus/iterm2-snazzy/blob/main/screenshot.png?raw=true"/>
     <i style="color: var(--dark-color-lighter)">snazzy</i>
 </p>
 
