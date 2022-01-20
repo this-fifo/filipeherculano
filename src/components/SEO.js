@@ -4,7 +4,7 @@ import { useStaticQuery, graphql } from 'gatsby'
 
 import { favicon } from '../assets/icons'
 
-export const SEO = ({ title }) => {
+export const Seo = ({ title }) => {
   const data = useStaticQuery(
     graphql`
       query {

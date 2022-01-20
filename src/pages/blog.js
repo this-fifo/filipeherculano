@@ -8,7 +8,7 @@ import {
   HeaderLogo,
   HeadingL,
   Layout,
-  SEO,
+  Seo,
   TextBody,
   TextDate,
 } from '../components'
@@ -25,7 +25,7 @@ const Post = styled.div`
 const Blog = ({ data }) => {
   return (
     <>
-      <SEO title="Blog" />
+      <Seo title="Blog" />
       <HeaderLogo />
       <Layout>
         {data.allMarkdownRemark.edges.map(({ node }) => (

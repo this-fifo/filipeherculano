@@ -5,14 +5,14 @@ import {
   HeaderBack,
   HeadingXL,
   Layout,
-  SEO,
+  Seo,
   TextBody,
 } from '../components'
 
 const About = () => {
   return (
     <>
-      <SEO title="About" />
+      <Seo title="About" />
       <HeaderBack />
       <Layout>
         <HeadingXL style={{ fontFamily: '"Kaushan Script", cursive' }}>
@@ -29,7 +29,16 @@ const About = () => {
             >
               <u>work</u>
             </a>{' '}
-            as a Senior Software Engineer at{' '}
+            as an Associate Architect at{' '}
+            <a
+              data-tooltip="Help Phreesia make healthcare better"
+              href="https://www.phreesia.com/company/careers/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <u>Phreesia</u>
+            </a>
+            . Previously, I worked as an Engineering Director at{' '}
             <a
               data-tooltip="Building next-generation market intelligence for cannabis"
               href="https://www.linkedin.com/company/pistil-data"
@@ -38,16 +47,7 @@ const About = () => {
             >
               <u>Pistil Data</u>
             </a>
-            . Previously, I worked as a Software Engineer III at{' '}
-            <a
-              data-tooltip="Help Phreesia make healthcare better"
-              href="https://www.phreesia.com/company/careers/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <u>Phreesia</u>
-            </a>{' '}
-            and as a Gymnastics Coach at{' '}
+            , and occasionally as a Gymnastics Coach at{' '}
             <a
               data-tooltip="backflips and stuff"
               href="https://www.ottawagymnasticscentre.ca/"

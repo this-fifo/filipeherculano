@@ -5,7 +5,7 @@ import { graphql } from 'gatsby'
 
 import { BREAKPOINT } from '../utils/constants'
 
-import { HeaderLogo, HeadingXL, Layout, SEO } from '../components'
+import { HeaderLogo, HeadingXL, Layout, Seo } from '../components'
 
 const Hero = styled.div`
   margin-bottom: 20vh;
@@ -29,7 +29,7 @@ const Home = ({ data }) => {
 
   return (
     <>
-      <SEO title="Home" />
+      <Seo title="Home" />
       <HeaderLogo />
       <Layout styles={data}>
         <Hero>

@@ -5,17 +5,17 @@ import {
   HeaderBack,
   HeadingXL,
   Layout,
-  SEO,
+  Seo,
   TextBody,
   TextDate,
 } from '../components'
 
-export default ({ data }) => {
+const BlogPost = ({ data }) => {
   const post = data.markdownRemark
 
   return (
     <>
-      <SEO title={post.frontmatter.title} />
+      <Seo title={post.frontmatter.title} />
       <HeaderBack />
       <Layout>
         <HeadingXL>{post.frontmatter.title}</HeadingXL>
@@ -25,6 +25,8 @@ export default ({ data }) => {
     </>
   )
 }
+
+export default BlogPost
 
 export const query = graphql`
   query($slug: String!) {

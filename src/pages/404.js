@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'gatsby'
 import styled from 'styled-components'
 
-import { Button, HeadingXL, Layout, SEO, TextBody } from '../components'
+import { Button, HeadingXL, Layout, Seo, TextBody } from '../components'
 
 const Wrapper = styled.div`
   display: flex;
@@ -19,7 +19,7 @@ const ButtonCentered = styled(Button)`
 const NotFoundPage = () => {
   return (
     <>
-      <SEO title="404: Not found" />
+      <Seo title="404: Not found" />
       <Layout>
         <Wrapper>
           <HeadingXL style={{ fontFamily: '"Kaushan Script", cursive' }}>
