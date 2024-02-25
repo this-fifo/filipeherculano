@@ -20,16 +20,16 @@ const About = () => {
         </HeadingXL>
         <TextBody>
           <p>
-            Hi there, currently I am working as a fractional CTO in a few startup projects. Before that, I{' '}
+            Hi there, currently I am{' '}
             <a
               data-tooltip="linkedin"
               href="https://ca.linkedin.com/in/filipeherculano"
               rel="noopener noreferrer"
               target="_blank"
             >
-              <u>worked</u>
+              <u>working</u>
             </a>{' '}
-            as an Associate Architect at{' '}
+            as a fractional CTO in a few startup projects. Previously, I worked as an Associate Architect at{' '}
             <a
               data-tooltip="Help Phreesia make healthcare better"
               href="https://www.phreesia.com/company/careers/"
@@ -38,7 +38,7 @@ const About = () => {
             >
               <u>Phreesia</u>
             </a>
-            . Previously, I worked as an Engineering Director at{' '}
+            , and as an Engineering Director at{' '}
             <a
               data-tooltip="Building next-generation market intelligence for cannabis"
               href="https://www.linkedin.com/company/pistil-data"
