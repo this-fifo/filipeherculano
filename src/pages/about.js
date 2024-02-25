@@ -20,7 +20,7 @@ const About = () => {
         </HeadingXL>
         <TextBody>
           <p>
-            Hi there, I currently{' '}
+            Hi there, currently I am working as a fractional CTO in a few startup projects. Before that, I was{' '}
             <a
               data-tooltip="linkedin"
               href="https://ca.linkedin.com/in/filipeherculano"
@@ -47,7 +47,7 @@ const About = () => {
             >
               <u>Pistil Data</u>
             </a>
-            , and occasionally as a Gymnastics Coach at{' '}
+            . Aside from that, I occasionally run warmups as a Gymnastics Coach at{' '}
             <a
               data-tooltip="backflips and stuff"
               href="https://www.ottawagymnasticscentre.ca/"
@@ -60,7 +60,7 @@ const About = () => {
           </p>
           <p>I enjoy web development, music creation, gymnastics and coffee.</p>
         </TextBody>
-        <Button href="mailto:dev&#64;filipeherculano.me?subject=Hi 👋&body=( ⧉ ⦣ ⧉ )">
+        <Button href="mailto:fifo&#64;duck.com?subject=Hi 👋&body=( ⧉ ⦣ ⧉ )">
           Get in touch
         </Button>
       </Layout>
