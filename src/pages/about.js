@@ -20,14 +20,14 @@ const About = () => {
         </HeadingXL>
         <TextBody>
           <p>
-            Hi there, currently I am working as a fractional CTO in a few startup projects. Before that, I was{' '}
+            Hi there, currently I am working as a fractional CTO in a few startup projects. Before that, I{' '}
             <a
               data-tooltip="linkedin"
               href="https://ca.linkedin.com/in/filipeherculano"
               rel="noopener noreferrer"
               target="_blank"
             >
-              <u>work</u>
+              <u>worked</u>
             </a>{' '}
             as an Associate Architect at{' '}
             <a
