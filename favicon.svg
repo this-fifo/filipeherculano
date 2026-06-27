@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Filipe Herculano monogram">
+  <rect width="32" height="32" rx="6" fill="#0A0A0A"/>
+  <!-- geometric F built from three strokes; thick enough to hold at 16px -->
+  <g fill="#F2F0EB">
+    <rect x="9" y="8" width="5" height="16"/>
+    <rect x="9" y="8" width="14" height="5"/>
+    <rect x="9" y="14.5" width="10" height="5"/>
+  </g>
+</svg>

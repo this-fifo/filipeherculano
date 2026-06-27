@@ -1,11 +1,23 @@
-# Filipe Herculano
+# filipeherculano.com
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/eb833e64-91f8-4e13-8cc0-f1184da0345e/deploy-status)](https://app.netlify.com/sites/filipeherculano/deploys)
+Personal site for **Filipe Herculano** — AI Engineer &amp; Advisor, based in Ottawa.
 
-Hey there, this is the repository for my personal website built with [Gatsby](https://www.gatsbyjs.org/) using lewislbr cool [theme](https://github.com/lewislbr/lewis-gatsby-starter-blog)
+Vanilla HTML/CSS/JS. No framework, no build step. The home is a single
+self-contained `index.html`; [Recursive](https://www.recursive.design/) (variable)
+is self-hosted. Light (Snazzy) / dark (Kanagawa Wave) themes with a persisted toggle.
 
-Feel free to open an issue with your suggestions and feedback
+## Run locally
+
+```sh
+python3 -m http.server 8099
+# → http://localhost:8099
+```
+
+## Deploy
+
+GitHub Pages, served from the repo root. Custom domain via `CNAME`
+(`filipeherculano.com`); `.dev` redirects to it.
 
 ʕ •ᴥ•ʔ
 
-[MIT](License) @ [Filipe Herculano](https://github.com/this-fifo)
+[MIT](LICENSE) © [Filipe Herculano](https://github.com/this-fifo)
