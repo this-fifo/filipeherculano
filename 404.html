@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>404 — Filipe Herculano</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/favicon.svg" />
+<style>
+  /* Recursive — self-hosted (same as the rest of the site) */
+  @font-face {
+    font-family:'Recursive'; font-style:oblique 0deg 15deg; font-weight:300 1000; font-display:swap;
+    src:url('/assets/fonts/recursive-latin.woff2') format('woff2');
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  :root{ --ink:#2A2C3A; --paper:#F4F4F6; --signal:#E5147F; --rec:"Recursive",system-ui,sans-serif; }
+  [data-theme="dark"]{ --ink:#DCD7BA; --paper:#1F1F28; --signal:#7E9CD8; }
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ margin:0; min-height:100svh; background:var(--paper); color:var(--ink);
+    font-family:var(--rec); font-variation-settings:"wght" 420,"slnt" 0,"CASL" .3,"MONO" 0;
+    display:grid; place-items:center; text-align:center; padding:8vh 6vw;
+    transition:background .4s ease, color .4s ease; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; }
+  .wrap{ max-width:44ch; }
+  .digits{ display:flex; justify-content:center; line-height:.9; user-select:none; }
+  .d{ display:inline-block; font-size:clamp(110px,32vw,300px);
+    font-variation-settings:"wght" 380,"slnt" 0,"CASL" 0,"MONO" 1;
+    transition:font-variation-settings .12s linear, color .25s ease; }
+  .kao{ font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:clamp(15px,4.2vw,28px);
+    white-space:nowrap; color:var(--signal); margin:.3em 0 0; letter-spacing:0; }
+  .msg{ margin:1.5em auto 0; font-size:clamp(16px,2vw,20px);
+    font-variation-settings:"wght" 420,"CASL" .4; color:color-mix(in srgb,var(--ink) 82%,transparent); }
+  .home{ display:inline-flex; align-items:center; gap:.5em; margin-top:2.2em;
+    font-variation-settings:"MONO" 1,"wght" 560; font-size:.92rem; letter-spacing:.04em;
+    text-decoration:none; border-bottom:2px solid var(--signal); padding-bottom:3px;
+    transition:font-variation-settings .18s linear; }
+  .home:hover,.home:focus-visible{ font-variation-settings:"MONO" 1,"wght" 780,"slnt" -6; }
+  a:focus-visible,button:focus-visible{ outline:2px solid var(--signal); outline-offset:4px; }
+  /* theme toggle — identical to the home */
+  .theme-toggle{ position:fixed; right:18px; bottom:18px; z-index:9000; width:42px; height:42px;
+    border-radius:50%; display:grid; place-items:center; cursor:pointer; background:var(--paper); color:var(--ink);
+    border:1.5px solid color-mix(in srgb,var(--ink) 32%,transparent); box-shadow:0 4px 16px rgba(0,0,0,.14);
+    transition:transform .2s ease, background .3s ease, color .3s ease, border-color .3s ease; }
+  .theme-toggle:hover{ transform:translateY(-2px); }
+  .theme-toggle svg{ width:18px; height:18px; }
+  .theme-toggle .ic-sun{ display:none; }
+  [data-theme="dark"] .theme-toggle .ic-moon{ display:none; }
+  [data-theme="dark"] .theme-toggle .ic-sun{ display:block; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+    .d{ font-variation-settings:"wght" 660,"slnt" -4,"CASL" 0,"MONO" 1; }
+  }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="digits" id="digits" aria-label="404"><span class="d">4</span><span class="d">0</span><span class="d">4</span></div>
+    <p class="kao">(╯°□°)╯︵ ┻━┻</p>
+    <p class="msg">This page doesn't exist.</p>
+    <a class="home" href="/">← Back home</a>
+  </main>
+
+  <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+    <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+
+  <script>
+  (function(){
+    var root=document.documentElement, btn=document.querySelector('.theme-toggle');
+    btn.setAttribute('aria-pressed', root.getAttribute('data-theme')==='dark'?'true':'false');
+    btn.addEventListener('click', function(){
+      var dark=root.getAttribute('data-theme')!=='dark';
+      if(dark) root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+      btn.setAttribute('aria-pressed', dark?'true':'false');
+      try{ localStorage.setItem('theme', dark?'dark':'light'); }catch(e){}
+    });
+    // signature: cursor-proximity variable-weight morph on the 404 digits
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var ds=[].slice.call(document.querySelectorAll('.d')), R=280;
+      window.addEventListener('pointermove', function(e){
+        for(var i=0;i<ds.length;i++){
+          var r=ds[i].getBoundingClientRect();
+          var dist=Math.hypot(e.clientX-(r.left+r.width/2), e.clientY-(r.top+r.height/2));
+          var t=Math.max(0,1-dist/R), ease=t*t*(3-2*t);
+          ds[i].style.fontVariationSettings='"wght" '+(380+ease*620).toFixed(0)+',"slnt" '+(-ease*12).toFixed(1)+',"CASL" 0,"MONO" 1';
+          ds[i].style.color = t>0.5 ? 'var(--signal)' : '';
+        }
+      }, {passive:true});
+    }
+  })();
+  </script>
+</body>
+</html>
