@@ -340,8 +340,15 @@
     .rail .tick{ font-size:10px; letter-spacing:.24em; }
     .contact-grid{ grid-template-columns:1fr; }
     .fact{ grid-template-columns:1fr; gap:8px; }
-    .portrait{ opacity:.12; width:62vw; right:-8vw; }
     .topline .loc{ text-align:left; }
+    /* hero reflow: portrait drops below the name (in-flow) so the name keeps a clean field */
+    .hero{ min-height:auto; justify-content:flex-start; gap:clamp(18px,4vh,34px); padding-bottom:clamp(30px,6vh,56px); }
+    .topline{ order:0; }
+    .word{ order:1; margin:0; }
+    .portrait{ order:2; position:relative; right:auto; top:auto; transform:none;
+      width:min(58vw,280px); margin:6px 0 0 auto; opacity:.85; }
+    .availability{ order:3; }
+    .portrait.ghost{ display:none; }
   }
   @media (max-width:480px){
     .word .glyph{ font-size:clamp(40px,15vw,72px); }
@@ -395,8 +402,8 @@
     <!-- ========== MARQUEE (scroll-velocity reactive) ========== -->
     <div class="marquee" aria-hidden="true">
       <div class="track" id="track">
-        <span class="item">AI&nbsp;engineering<span class="star">✳</span>Advisory<span class="star">✳</span>Engineering&nbsp;leadership<span class="star">✳</span>Dev&nbsp;tooling<span class="star">✳</span>Side&nbsp;projects<span class="star">✳</span></span>
-        <span class="item">AI&nbsp;engineering<span class="star">✳</span>Advisory<span class="star">✳</span>Engineering&nbsp;leadership<span class="star">✳</span>Dev&nbsp;tooling<span class="star">✳</span>Side&nbsp;projects<span class="star">✳</span></span>
+        <span class="item">AI&nbsp;engineering<span class="star">✱</span>Advisory<span class="star">✱</span>Engineering&nbsp;leadership<span class="star">✱</span>Dev&nbsp;tooling<span class="star">✱</span>Side&nbsp;projects<span class="star">✱</span></span>
+        <span class="item">AI&nbsp;engineering<span class="star">✱</span>Advisory<span class="star">✱</span>Engineering&nbsp;leadership<span class="star">✱</span>Dev&nbsp;tooling<span class="star">✱</span>Side&nbsp;projects<span class="star">✱</span></span>
       </div>
     </div>
 
