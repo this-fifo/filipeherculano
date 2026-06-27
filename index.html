@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Filipe Herculano — AI Engineer · Advisor</title>
+<link rel="icon" href="/favicon.svg" />
+<link rel="canonical" href="https://filipeherculano.com/" />
+<meta name="description" content="AI engineer and advisor in Ottawa. I help companies with their AI strategy." />
+
+<!-- Recursive is self-hosted via @font-face (see the stylesheet) — no external CDN -->
+
+<!-- arm JS-only hiding immediately, so content is never trapped at opacity:0
+     when scripting is off or the main script fails before reveals run -->
+<script>document.documentElement.className+=" js";</script>
+
+<style>
+  /* Recursive — self-hosted variable font (wght / slnt / CASL / MONO axes), latin subset */
+  @font-face {
+    font-family: 'Recursive';
+    font-style: oblique 0deg 15deg;
+    font-weight: 300 1000;
+    font-display: swap;
+    src: url('/assets/fonts/recursive-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  /* ============ TOKENS ============
+     Palette — 3 hex, monochrome + one cold accent.
+     The type is the interface; one variable family (Recursive)
+     morphs across wght / slnt / CASL / MONO. */
+  :root{
+    /* Default theme — Snazzy (light) */
+    --ink:    #2A2C3A;
+    --paper:  #F4F4F6;
+    --signal: #E5147F;
+    --c1: #E5147F; --c2: #16A05A; --c3: #1F86CC; /* accent rotation: section nums + marquee stars */
+
+    --rec: "Recursive", system-ui, sans-serif;
+
+    --rail: 64px;        /* left mono rail width on desktop */
+    --gut:  clamp(20px, 5vw, 72px);
+  }
+
+  /* Dark theme — Kanagawa Wave (toggled via the sun/moon button) */
+  [data-theme="dark"]{
+    --ink:    #DCD7BA;
+    --paper:  #1F1F28;
+    --signal: #7E9CD8;
+    --c1: #7E9CD8; --c2: #98BB6C; --c3: #D27E99;
+  }
+  /* dark portrait: local backdrop = page bg, then screen-blend the inverted figure (no box) */
+  [data-theme="dark"] .portrait{
+    isolation:isolate;
+    background-image:none !important;
+    background-color:var(--paper) !important;
+    filter:none !important;
+    opacity:.9 !important;
+  }
+  [data-theme="dark"] .portrait::before{
+    content:""; position:absolute; inset:0;
+    background:url("/assets/portrait.jpg") center/contain no-repeat;
+    filter:grayscale(1) invert(1) contrast(1.25) brightness(1.05);
+    mix-blend-mode:screen;
+  }
+  [data-theme="dark"] .portrait.ghost{ display:none !important; }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--rec);
+    font-variation-settings:"wght" 420,"slnt" 0,"CASL" 0,"MONO" 0;
+    font-feature-settings:"ss03","dlig";
+    line-height:1.36;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* paper grain — fixed, ultra-subtle, never moves */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:.05; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ============ FOCUS ============ */
+  a:focus-visible,button:focus-visible{
+    outline:2px solid var(--signal);
+    outline-offset:4px;
+    text-decoration-color:var(--signal);
+  }
+
+  /* ============ SHELL ============ */
+  .shell{
+    position:relative; z-index:1;
+    padding-left:var(--rail);
+  }
+
+  /* fixed vertical mono rail — section index */
+  .rail{
+    position:fixed; top:0; left:0; bottom:0; width:var(--rail);
+    z-index:6;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:space-between;
+    padding:18px 0;
+    border-right:1px solid color-mix(in srgb,var(--ink) 16%,transparent);
+    background:var(--paper);
+    mix-blend-mode:multiply;
+  }
+  .rail .tick{ writing-mode:vertical-rl; text-orientation:mixed;
+    font-variation-settings:"MONO" 1,"wght" 560,"CASL" 0;
+    font-size:11px; letter-spacing:.34em; text-transform:uppercase;
+    color:color-mix(in srgb,var(--ink) 62%,transparent);
+  }
+  .rail .dot{ writing-mode:vertical-rl; font-size:11px;
+    font-variation-settings:"MONO" 1,"wght" 700; letter-spacing:.2em; }
+
+  /* ============ TYPE UTILITY ============ */
+  .label{
+    font-variation-settings:"MONO" 1,"wght" 540,"CASL" 0,"slnt" 0;
+    font-size:11px; letter-spacing:.36em; text-transform:uppercase;
+    color:color-mix(in srgb,var(--ink) 55%,transparent);
+  }
+  .num{
+    font-variation-settings:"MONO" 1,"wght" 760;
+    color:var(--signal);
+  }
+  section.block:nth-of-type(1) .num{ color:var(--c1); }
+  section.block:nth-of-type(2) .num{ color:var(--c2); }
+  section.block:nth-of-type(3) .num{ color:var(--c3); }
+
+  /* ============ HERO ============ */
+  .hero{
+    min-height:100svh;
+    padding:clamp(28px,6vh,64px) var(--gut) clamp(40px,7vh,72px);
+    display:flex; flex-direction:column; justify-content:space-between;
+    position:relative; overflow:hidden;
+  }
+
+  .topline{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:16px; flex-wrap:wrap;
+  }
+  .topline .role{
+    font-variation-settings:"MONO" 1,"wght" 600,"CASL" 0;
+    font-size:clamp(11px,1.3vw,13px); letter-spacing:.26em; text-transform:uppercase;
+  }
+  .topline .role .b{ color:var(--signal); }
+  .topline .loc{ text-align:right; }
+
+  /* the giant kinetic wordmark */
+  .word{
+    margin:clamp(12px,4vh,40px) 0;
+    line-height:.82;
+    user-select:none;
+  }
+  .word .line{ display:block; white-space:nowrap; }
+  .word .glyph{
+    display:inline-block;
+    font-size:clamp(54px, 17.5vw, 248px);
+    font-variation-settings:"wght" 380,"slnt" 0,"CASL" 0,"MONO" 0;
+    will-change:font-variation-settings, transform;
+    transition:font-variation-settings .12s linear, color .25s ease;
+  }
+  .word .line.last{ margin-top:-.04em; }
+  .word .glyph.sp{ width:.26em; }
+
+  .availability{
+    max-width:46ch;
+    font-size:clamp(15px,1.8vw,19px);
+    font-variation-settings:"wght" 420,"CASL" .35,"slnt" 0;
+    color:color-mix(in srgb,var(--ink) 84%,transparent);
+  }
+  .availability .open{
+    font-variation-settings:"wght" 720,"CASL" .5,"slnt" 0;
+    border-bottom:2px solid var(--signal);
+  }
+
+  /* portrait — black-on-white illustration dropped onto paper via
+     multiply (white vanishes, ink stays) then thresholded for a
+     high-contrast duotone. No alpha mask: the art IS the mask. */
+  .portrait{
+    position:absolute; z-index:0; pointer-events:none;
+    right:clamp(-40px,2vw,40px);
+    top:50%; transform:translateY(-48%);
+    width:clamp(220px,34vw,500px);
+    aspect-ratio:1300/1700;
+    background:url("assets/portrait.jpg") center/contain no-repeat;
+    mix-blend-mode:multiply;
+    opacity:.55;
+    /* push toward a hard threshold; brightness lifts the off-white ground
+       to pure white so it vanishes under multiply, leaving only dark ink */
+    filter:grayscale(1) brightness(1.12) contrast(1.4);
+    transition:opacity .4s ease, filter .4s ease;
+  }
+  /* registration-shift layer — the SAME thresholded ink, displaced on
+     cursor for a kinetic double-exposure (a misregistered second pass,
+     like off-plate printing). No tint: the ink stays ink, so the palette
+     holds at exactly three colours and the only blue on the page is the
+     live cursor weight-field — the one place boldness is spent. */
+  .portrait.ghost{
+    background:url("assets/portrait.jpg") center/contain no-repeat;
+    mix-blend-mode:multiply;      /* white stays transparent; ink darkens */
+    opacity:0;
+    filter:grayscale(1) brightness(1.12) contrast(1.4);
+    transition:opacity .25s ease, transform .14s ease;
+  }
+
+  /* ============ MARQUEE — scroll-velocity reactive ============ */
+  .marquee{
+    border-top:1px solid color-mix(in srgb,var(--ink) 20%,transparent);
+    border-bottom:1px solid color-mix(in srgb,var(--ink) 20%,transparent);
+    overflow:hidden; padding:14px 0;
+    margin-left:calc(-1 * var(--rail));
+  }
+  .marquee .track{
+    display:flex; white-space:nowrap; width:max-content;
+    will-change:transform;
+  }
+  .marquee .item{
+    font-size:clamp(28px,5.4vw,64px);
+    font-variation-settings:"wght" 360,"slnt" 0,"CASL" 0;
+    padding:0 .4em;
+    transition:font-variation-settings .2s linear;
+  }
+  .marquee .item .star{ color:var(--signal); padding:0 .25em;
+    font-variation-settings:"wght" 800; }
+  .marquee .item .star:nth-child(3n+1){ color:var(--c1); }
+  .marquee .item .star:nth-child(3n+2){ color:var(--c2); }
+  .marquee .item .star:nth-child(3n+3){ color:var(--c3); }
+
+  /* ============ SECTIONS ============ */
+  section.block{
+    padding:clamp(60px,12vh,140px) var(--gut);
+    border-top:1px solid color-mix(in srgb,var(--ink) 14%,transparent);
+  }
+  .head{
+    display:flex; align-items:baseline; gap:18px; margin-bottom:clamp(28px,5vh,56px);
+  }
+  .head .title{
+    font-size:clamp(26px,4vw,52px);
+    font-variation-settings:"wght" 760,"slnt" 0,"CASL" 0;
+    letter-spacing:-.01em;
+  }
+
+  /* CURRENTLY — three facts */
+  .facts{ display:grid; gap:1px; background:color-mix(in srgb,var(--ink) 14%,transparent);
+    border:1px solid color-mix(in srgb,var(--ink) 14%,transparent); }
+  .fact{
+    background:var(--paper);
+    padding:clamp(20px,3vw,34px);
+    display:grid; grid-template-columns:auto 1fr; gap:clamp(14px,3vw,40px); align-items:start;
+  }
+  .fact .k{ white-space:nowrap; }
+  .fact .v{
+    font-size:clamp(19px,2.6vw,30px);
+    font-variation-settings:"wght" 460,"CASL" .25,"slnt" 0;
+    line-height:1.18; max-width:42ch;
+  }
+  .fact .v b{ font-variation-settings:"wght" 760,"CASL" .25; font-weight:normal; }
+  .fact:hover .v{ font-variation-settings:"wght" 540,"CASL" .55,"slnt" -4; }
+  .fact .v, .fact:hover .v{ transition:font-variation-settings .3s ease; }
+
+  /* ABOUT — bio prose; label-left like .fact, readable paragraph size, no hover morph */
+  .about{ display:grid; gap:clamp(24px,3.5vh,38px); }
+  .about-row{ display:grid; grid-template-columns:11rem 1fr; gap:clamp(14px,3vw,40px); align-items:start; }
+  .about .label{ line-height:1.6; }
+  .about .bio{ max-width:58ch; font-size:clamp(15px,1.8vw,19px);
+    font-variation-settings:"wght" 420,"CASL" .35,"slnt" 0; line-height:1.5;
+    color:color-mix(in srgb,var(--ink) 86%,transparent); }
+  @media (max-width:780px){ .about-row{ grid-template-columns:1fr; gap:8px; } }
+
+  /* WRITING — plain list, newest first */
+  .arch-list{ list-style:none; margin:0; padding:0; max-width:60ch; }
+  .arch-list li{ border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent); }
+  .arch-list a,.arch-list .wsoon{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+    padding:clamp(12px,1.8vw,18px) 0;
+    font-size:clamp(20px,3vw,34px);
+    font-variation-settings:"wght" 440,"slnt" 0,"CASL" 0;
+  }
+  .arch-list a{
+    transition:font-variation-settings .18s linear, padding-left .25s ease, color .2s ease;
+  }
+  .arch-list a:hover,.arch-list a:focus-visible{
+    font-variation-settings:"wght" 760,"slnt" -6,"CASL" .35;
+    padding-left:14px; color:var(--signal);
+  }
+  .arch-list .wy{ white-space:nowrap; align-self:center; }
+  /* non-published item: quiet, non-interactive */
+  .arch-list .wsoon{ color:color-mix(in srgb,var(--ink) 48%,transparent); }
+  .arch-list .wmark{ white-space:nowrap; align-self:center; }
+
+  /* CONTACT */
+  .contact-grid{ display:grid; gap:1px; background:color-mix(in srgb,var(--ink) 14%,transparent);
+    border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);
+    grid-template-columns:repeat(2,1fr); }
+  .contact-grid a{
+    background:var(--paper); padding:clamp(22px,3vw,40px);
+    display:flex; flex-direction:column; gap:10px; min-height:160px; justify-content:space-between;
+    transition:background .25s ease;
+  }
+  .contact-grid a .c{
+    font-size:clamp(17px,1.9vw,21px);
+    font-variation-settings:"wght" 560,"slnt" 0,"CASL" 0; word-break:break-word;
+    transition:font-variation-settings .2s linear, color .2s ease;
+  }
+  .contact-grid a:hover,.contact-grid a:focus-visible{ background:var(--ink); color:var(--paper); }
+  .contact-grid a:hover .c,.contact-grid a:focus-visible .c{
+    font-variation-settings:"wght" 740,"slnt" -6,"CASL" .4; color:var(--signal);
+  }
+  .contact-grid a:hover .label,.contact-grid a:focus-visible .label{ color:color-mix(in srgb,var(--paper) 60%,transparent); }
+
+  /* FOOTER */
+  footer{
+    padding:clamp(28px,5vh,48px) var(--gut);
+    border-top:1px solid color-mix(in srgb,var(--ink) 14%,transparent);
+    display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  footer .label{ font-size:10px; }
+
+  /* reveal — for sections (gated, only when JS is live to un-hide them) */
+  .js .reveal{ opacity:0; transform:translateY(22px); }
+  .js .reveal.revealed{ opacity:1; transform:none;
+    transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:780px){
+    :root{ --rail:40px; }
+    .rail .tick{ font-size:10px; letter-spacing:.24em; }
+    .contact-grid{ grid-template-columns:1fr; }
+    .fact{ grid-template-columns:1fr; gap:8px; }
+    .portrait{ opacity:.12; width:62vw; right:-8vw; }
+    .topline .loc{ text-align:left; }
+  }
+  @media (max-width:480px){
+    .word .glyph{ font-size:clamp(40px,15vw,72px); }
+    .head{ flex-direction:column; gap:6px; }
+  }
+
+  /* ============ REDUCED MOTION — static but striking ============ */
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+    .reveal{ opacity:1 !important; transform:none !important; }
+    /* fix type into a deliberate, weighted static composition */
+    .word .glyph{ font-variation-settings:"wght" 720,"slnt" -4,"CASL" 0; }
+    .word .glyph.alt{ font-variation-settings:"wght" 360,"slnt" 0,"CASL" 0; }
+    .marquee .item{ font-variation-settings:"wght" 520; }
+    .portrait{ opacity:.2; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- vertical mono rail -->
+  <nav class="rail" aria-label="Section index">
+    <span class="dot">FH</span>
+    <span class="tick">AI&nbsp;Engineer&nbsp;·&nbsp;Ottawa</span>
+    <span class="dot" aria-hidden="true">↓</span>
+  </nav>
+
+  <div class="shell">
+
+    <!-- ========== HERO ========== -->
+    <header class="hero">
+      <div class="topline">
+        <div class="role">AI&nbsp;Engineer <span class="b">·</span> Advisor</div>
+        <div class="loc label">Ottawa, Canada</div>
+      </div>
+
+      <h1 class="word" id="word" aria-label="Filipe Herculano">
+        <span class="line" data-line>Filipe</span>
+        <span class="line last" data-line>Herculano</span>
+      </h1>
+
+      <p class="availability">
+        Engineering leadership and AI strategist,
+        <span class="open">open</span> to advisory work.
+      </p>
+
+      <div class="portrait" id="portrait" aria-hidden="true"></div>
+      <div class="portrait ghost" id="portraitGhost" aria-hidden="true"></div>
+    </header>
+
+    <!-- ========== MARQUEE (scroll-velocity reactive) ========== -->
+    <div class="marquee" aria-hidden="true">
+      <div class="track" id="track">
+        <span class="item">AI&nbsp;engineering<span class="star">✳</span>Advisory<span class="star">✳</span>Engineering&nbsp;leadership<span class="star">✳</span>Dev&nbsp;tooling<span class="star">✳</span>Side&nbsp;projects<span class="star">✳</span></span>
+        <span class="item">AI&nbsp;engineering<span class="star">✳</span>Advisory<span class="star">✳</span>Engineering&nbsp;leadership<span class="star">✳</span>Dev&nbsp;tooling<span class="star">✳</span>Side&nbsp;projects<span class="star">✳</span></span>
+      </div>
+    </div>
+
+    <!-- ========== ABOUT ========== -->
+    <section class="block reveal" aria-labelledby="cur">
+      <div class="head">
+        <span class="num">01</span>
+        <h2 class="title" id="cur">About</h2>
+      </div>
+      <div class="about">
+        <div class="about-row">
+          <span class="k label">Bio</span>
+          <p class="bio">I'm an artist at heart turned software engineer who bridges technical expertise with creative vision. My journey from startup environments to corporate leadership roles has taught me that impactful technology lives at the intersection of code and human connection.</p>
+        </div>
+        <div class="about-row">
+          <span class="k label">What drives me</span>
+          <p class="bio">Solving complex technical challenges that create tangible connections. Whether optimizing data pipelines for global enterprises or designing AI tools that expand creative expression, I measure success by how technology resonates with people's lived experiences.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== WRITING ========== -->
+    <section class="block reveal" aria-labelledby="wr">
+      <div class="head">
+        <span class="num">02</span>
+        <h2 class="title" id="wr">Writing</h2>
+      </div>
+
+      <ul class="arch-list">
+        <li><a href="/dash-o-pepper/"><span class="wt">Meet Dash O'Pepper</span><span class="wy label">2019</span></a></li>
+      </ul>
+    </section>
+
+    <!-- ========== CONTACT ========== -->
+    <section class="block reveal" aria-labelledby="ct">
+      <div class="head">
+        <span class="num">03</span>
+        <h2 class="title" id="ct">Contact</h2>
+      </div>
+      <div class="contact-grid">
+        <a href="https://ca.linkedin.com/in/filipeherculano" rel="me noopener" target="_blank">
+          <span class="label">LinkedIn</span>
+          <span class="c">in/filipeherculano</span>
+        </a>
+        <a href="https://github.com/this-fifo" rel="me noopener" target="_blank">
+          <span class="label">GitHub</span>
+          <span class="c">@this-fifo</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <span class="label">Filipe Herculano — Fifo</span>
+      <span class="label">Set in Recursive · 2026</span>
+    </footer>
+
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* -------- split the wordmark into per-glyph spans -------- */
+  var word = document.getElementById("word");
+  var lines = word.querySelectorAll("[data-line]");
+  var glyphs = [];
+  lines.forEach(function(line){
+    var txt = line.textContent;
+    line.textContent = "";
+    for(var i=0;i<txt.length;i++){
+      var ch = txt[i];
+      var s = document.createElement("span");
+      s.className = "glyph";
+      if(ch === " "){ s.className += " sp"; }
+      s.textContent = ch === " " ? " " : ch;
+      line.appendChild(s);
+      glyphs.push(s);
+    }
+  });
+
+  /* If reduced motion: bake a deliberate static composition and bail
+     out of every dynamic system. The CSS @media already styles it;
+     we add an .alt class to a few glyphs for rhythm. */
+  if(reduce.matches){
+    glyphs.forEach(function(g,i){ if(i % 3 === 0) g.classList.add("alt"); });
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("revealed"); });
+    return;
+  }
+
+  /* -------- SIGNATURE: cursor-proximity variable weight field -------- */
+  var pointer = { x: -9999, y: -9999, active:false };
+  var RADIUS = 320;          // px of influence
+  var centers = [];          // cached glyph centres
+
+  function measure(){
+    centers = glyphs.map(function(g){
+      var r = g.getBoundingClientRect();
+      return { el:g, x:r.left + r.width/2, y:r.top + r.height/2 };
+    });
+  }
+
+  // cache lerped state per glyph for smooth easing
+  var state = glyphs.map(function(){ return { w:380, s:0, m:0 }; });
+
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  function fieldFrame(){
+    for(var i=0;i<centers.length;i++){
+      var c = centers[i];
+      var dx = pointer.x - c.x, dy = pointer.y - c.y;
+      var d = Math.sqrt(dx*dx + dy*dy);
+      var t = pointer.active ? clamp(1 - d/RADIUS, 0, 1) : 0;
+      var ease = t*t*(3 - 2*t);                  // smoothstep
+      var tw = 380 + ease * 620;                 // wght 380 -> 1000
+      var ts = -ease * 14;                       // slnt 0 -> -14
+      var tm = ease * 0.45;                      // MONO 0 -> .45
+      var st = state[i];
+      st.w += (tw - st.w) * 0.18;                // critically-damped-ish
+      st.s += (ts - st.s) * 0.18;
+      st.m += (tm - st.m) * 0.18;
+      c.el.style.fontVariationSettings =
+        '"wght" ' + st.w.toFixed(0) +
+        ',"slnt" ' + st.s.toFixed(1) +
+        ',"CASL" 0,"MONO" ' + st.m.toFixed(2);
+      if(t > 0.55) c.el.style.color = "var(--signal)";
+      else c.el.style.color = "";
+    }
+    rafField = requestAnimationFrame(fieldFrame);
+  }
+  var rafField = requestAnimationFrame(fieldFrame);
+
+  window.addEventListener("pointermove", function(e){
+    pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = true;
+    movePortrait(e.clientX, e.clientY);
+  }, {passive:true});
+  window.addEventListener("pointerleave", function(){ pointer.active = false; });
+  window.addEventListener("resize", measure);
+  window.addEventListener("scroll", measure, {passive:true});
+  // re-measure after fonts settle (variable font swap shifts metrics)
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(measure); }
+  setTimeout(measure, 60); measure();
+
+  /* -------- portrait: cursor-reactive threshold / duotone offset -------- */
+  var portrait = document.getElementById("portrait");
+  var ghost = document.getElementById("portraitGhost");
+  var pState = { tx:0, ty:0 };
+  function movePortrait(x,y){
+    var w = window.innerWidth, h = window.innerHeight;
+    pState.tx = ((x/w) - 0.5) * 40;   // wider drift => the misregistration reads
+    pState.ty = ((y/h) - 0.5) * 40;
+  }
+  (function portraitFrame(){
+    // ghost ink layer drifts off-register toward cursor; main gains contrast
+    ghost.style.transform = "translateY(-48%) translate(" +
+      pState.tx.toFixed(1) + "px," + pState.ty.toFixed(1) + "px)";
+    ghost.style.opacity = pointer.active ? "0.32" : "0";
+    portrait.style.filter = "grayscale(1) brightness(1.12) contrast(" +
+      (pointer.active ? 1.85 : 1.4) + ")";
+    requestAnimationFrame(portraitFrame);
+  })();
+
+  /* -------- SIGNATURE pt.2: scroll-velocity-reactive marquee -------- */
+  var track = document.getElementById("track");
+  var trackHalf = 0;
+  function measureTrack(){ trackHalf = track.scrollWidth / 2; }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(measureTrack); }
+  setTimeout(measureTrack, 60); measureTrack();
+  window.addEventListener("resize", measureTrack);
+
+  var offset = 0;
+  var baseSpeed = 0.6;       // px/frame idle drift
+  var velocity = 0;          // smoothed scroll velocity
+  var lastScroll = window.pageYOffset;
+  var skew = 0, mWeight = 360;
+  var items = track.querySelectorAll(".item");
+
+  window.addEventListener("scroll", function(){
+    var y = window.pageYOffset;
+    velocity += (y - lastScroll);
+    lastScroll = y;
+  }, {passive:true});
+
+  (function marqueeFrame(){
+    velocity *= 0.86;                                  // decay
+    var v = velocity;
+    // scroll velocity pushes marquee + skews + bolds the type
+    offset -= baseSpeed + v * 0.9;
+    if(offset <= -trackHalf) offset += trackHalf;
+    if(offset > 0) offset -= trackHalf;
+    track.style.transform = "translate3d(" + offset.toFixed(2) + "px,0,0)";
+
+    var targetSkew = clamp(v * 0.6, -12, 12);
+    skew += (targetSkew - skew) * 0.12;
+    var targetW = 360 + clamp(Math.abs(v) * 14, 0, 480);
+    mWeight += (targetW - mWeight) * 0.12;
+    for(var i=0;i<items.length;i++){
+      items[i].style.transform = "skewX(" + skew.toFixed(2) + "deg)";
+      items[i].style.fontVariationSettings = '"wght" ' + mWeight.toFixed(0) + ',"slnt" 0,"CASL" 0';
+    }
+    requestAnimationFrame(marqueeFrame);
+  })();
+
+  /* -------- orchestrated load: glyphs settle in from light -> set weight -------- */
+  glyphs.forEach(function(g,i){
+    g.style.opacity = "0";
+    g.style.transform = "translateY(14px)";
+    g.style.fontVariationSettings = '"wght" 300,"slnt" -10,"CASL" 0,"MONO" 0';
+    setTimeout(function(){
+      g.style.transition = "opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1), font-variation-settings .6s cubic-bezier(.2,.8,.2,1)";
+      g.style.opacity = "1";
+      g.style.transform = "none";
+      g.style.fontVariationSettings = '"wght" 380,"slnt" 0,"CASL" 0,"MONO" 0';
+      // restore the snappy field transition once landed
+      setTimeout(function(){ g.style.transition = "font-variation-settings .12s linear, color .25s ease"; }, 650);
+    }, 120 + i * 42);
+  });
+
+  /* -------- section reveals -------- */
+  var reveals = document.querySelectorAll(".reveal");
+  function revealAll(){ reveals.forEach(function(el){ el.classList.add("revealed"); }); }
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("revealed"); io.unobserve(en.target); }
+      });
+    }, { threshold:0.12 });
+    reveals.forEach(function(el){ io.observe(el); });
+    // failsafe: content can never stay trapped at opacity:0
+    setTimeout(revealAll, 4000);
+  } else {
+    revealAll();
+  }
+})();
+</script>
+
+<!-- light/dark toggle — Snazzy Light (default) ⇄ Kanagawa Wave -->
+<style>
+  .theme-toggle{ position:fixed; right:18px; bottom:18px; z-index:9000;
+    width:42px; height:42px; border-radius:50%; display:grid; place-items:center; cursor:pointer;
+    background:var(--paper); color:var(--ink);
+    border:1.5px solid color-mix(in srgb,var(--ink) 32%,transparent);
+    box-shadow:0 4px 16px rgba(0,0,0,.14);
+    transition:transform .2s ease, background .3s ease, color .3s ease, border-color .3s ease; }
+  .theme-toggle:hover{ transform:translateY(-2px); }
+  .theme-toggle:focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+  .theme-toggle svg{ width:18px; height:18px; }
+  .theme-toggle .ic-sun{ display:none; }
+  [data-theme="dark"] .theme-toggle .ic-moon{ display:none; }
+  [data-theme="dark"] .theme-toggle .ic-sun{ display:block; }
+  @media (prefers-reduced-motion: reduce){ .theme-toggle{ transition:none; } }
+</style>
+<button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+  <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+</button>
+<script>
+(function(){
+  var root=document.documentElement, btn=document.querySelector('.theme-toggle');
+  function set(dark){
+    if(dark) root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+    btn.setAttribute('aria-pressed', dark?'true':'false');
+    try{ localStorage.setItem('theme', dark?'dark':'light'); }catch(e){}
+  }
+  btn.setAttribute('aria-pressed', root.getAttribute('data-theme')==='dark'?'true':'false');
+  btn.addEventListener('click', function(){ set(root.getAttribute('data-theme')!=='dark'); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+/* ============================================================
+   ARCHIVE — shared stylesheet for the index AND every post page.
+
+   Deliberately the opposite of the Kinetic home: quiet, neutral,
+   monochrome, highly readable. No motion. This shell signals
+   "older / experimental work, kept for transparency."
+
+   Post pages need NO custom classes — semantic elements are
+   styled directly inside .prose.
+
+   Wrapper contract:
+     <body>
+       <header class="topbar"> ... </header>
+       <main class="prose"> ... </main>
+       <footer> ... </footer>
+     </body>
+   ============================================================ */
+
+/* ---------------- TOKENS — minimal monochrome palette ---------------- */
+:root{
+  --ink:    #1A1A1A;   /* near-black text on paper */
+  --paper:  #FBFBFA;   /* soft off-white paper */
+  --muted:  #6B6B6B;   /* quiet gray — dates, captions, footer */
+  --line:   #E2E1DD;   /* hairline rules + borders */
+  --tint:   #F1F0EC;   /* subtle tinted background for code */
+  --accent: #3D2BFF;   /* one quiet accent — links on hover, external marks */
+
+  --measure: 68ch;     /* reading width cap */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", monospace;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:18px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---------------- TOPBAR — small back-link nav row ---------------- */
+.topbar{
+  max-width:var(--measure);
+  margin:0 auto;
+  padding:24px 24px 0;
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  font-size:14px;
+  color:var(--muted);
+}
+.topbar a{
+  color:var(--muted);
+  text-decoration:none;
+}
+.topbar a:hover{
+  color:var(--accent);
+  text-decoration:underline;
+}
+.topbar .sep{ color:var(--line); }
+
+/* ---------------- PROSE — the reading column ---------------- */
+.prose{
+  max-width:var(--measure);
+  margin:0 auto;
+  padding:32px 24px 64px;
+}
+
+/* headings */
+.prose h1,
+.prose h2,
+.prose h3{
+  line-height:1.25;
+  font-weight:650;
+  letter-spacing:-0.01em;
+}
+.prose h1{
+  font-size:2rem;
+  margin:0.4em 0 0.3em;
+}
+.prose h2{
+  font-size:1.4rem;
+  margin:1.8em 0 0.5em;
+}
+.prose h3{
+  font-size:1.15rem;
+  margin:1.6em 0 0.4em;
+}
+
+/* date label — small, muted */
+.date{
+  display:block;
+  font-size:14px;
+  color:var(--muted);
+  margin:0 0 1.6em;
+}
+
+/* body copy */
+.prose p{ margin:0 0 1.2em; }
+
+.prose strong{ font-weight:650; }
+.prose em{ font-style:italic; }
+
+/* lists */
+.prose ul,
+.prose ol{
+  margin:0 0 1.2em;
+  padding-left:1.4em;
+}
+.prose li{ margin:0.3em 0; }
+.prose li > ul,
+.prose li > ol{ margin:0.3em 0; }
+
+/* links — underlined ink; quiet accent on hover */
+.prose a{
+  color:var(--ink);
+  text-decoration:underline;
+  text-decoration-color:var(--line);
+  text-underline-offset:2px;
+}
+.prose a:hover{
+  color:var(--accent);
+  text-decoration-color:var(--accent);
+}
+/* external links carry the accent so the jump-off reads */
+.prose a[target="_blank"],
+.prose a[rel~="external"]{
+  text-decoration-color:var(--muted);
+}
+.prose a[target="_blank"]:hover,
+.prose a[rel~="external"]:hover{
+  color:var(--accent);
+  text-decoration-color:var(--accent);
+}
+
+/* blockquote — quiet rule, slightly muted */
+.prose blockquote{
+  margin:1.4em 0;
+  padding:0.2em 0 0.2em 1.1em;
+  border-left:3px solid var(--line);
+  color:var(--muted);
+}
+.prose blockquote p:last-child{ margin-bottom:0; }
+
+/* horizontal rule */
+.prose hr{
+  border:0;
+  border-top:1px solid var(--line);
+  margin:2.4em 0;
+}
+
+/* ---------------- CODE ---------------- */
+.prose pre{
+  background:var(--tint);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:14px 16px;
+  margin:0 0 1.4em;
+  overflow-x:auto;
+  font-family:var(--mono);
+  font-size:0.86em;
+  line-height:1.5;
+}
+.prose pre code{
+  background:none;
+  padding:0;
+  border:0;
+  font-size:inherit;
+}
+/* inline code — tinted chip */
+.prose code{
+  background:var(--tint);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:0.1em 0.36em;
+  font-family:var(--mono);
+  font-size:0.86em;
+}
+
+/* ---------------- MEDIA ---------------- */
+.prose img{
+  display:block;
+  max-width:100%;
+  height:auto;
+  margin:1.6em auto;
+  border:1px solid var(--line);
+  border-radius:4px;
+}
+.prose figure{
+  margin:1.8em 0;
+}
+.prose figure img{ margin:0 auto 0.6em; }
+.prose figcaption{
+  font-size:14px;
+  font-style:italic;
+  color:var(--muted);
+  text-align:center;
+}
+
+/* ---------------- INDEX — post list ---------------- */
+.prose .intro{
+  color:var(--muted);
+  margin:0 0 2em;
+}
+.prose .posts{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.prose .posts li{
+  margin:0;
+  border-top:1px solid var(--line);
+}
+.prose .posts li:last-child{
+  border-bottom:1px solid var(--line);
+}
+.prose .posts a{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+  padding:14px 2px;
+  text-decoration:none;
+  color:var(--ink);
+}
+.prose .posts a:hover{
+  color:var(--accent);
+}
+.prose .posts a:hover .title{
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.prose .posts .title{
+  font-weight:500;
+}
+.prose .posts .date{
+  display:inline;
+  margin:0;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------------- FOOTER — small, muted ---------------- */
+footer{
+  max-width:var(--measure);
+  margin:0 auto;
+  padding:24px 24px 48px;
+  border-top:1px solid var(--line);
+  font-size:13px;
+  color:var(--muted);
+}
+footer a{
+  color:var(--muted);
+  text-decoration:underline;
+  text-decoration-color:var(--line);
+}
+footer a:hover{ color:var(--accent); }
+
+/* ---------------- FOCUS ---------------- */
+a:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width:600px){
+  body{ font-size:17px; }
+  .prose h1{ font-size:1.7rem; }
+  .prose .posts a{
+    flex-direction:column;
+    gap:2px;
+  }
+}
+
+/* ---------------- REDUCED MOTION — already near-static ---------------- */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
