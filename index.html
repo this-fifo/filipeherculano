@@ -124,6 +124,8 @@
   }
   .rail .dot{ writing-mode:vertical-rl; font-size:11px;
     font-variation-settings:"MONO" 1,"wght" 700; letter-spacing:.2em; }
+  .rail .dot.code{ writing-mode:horizontal-tb; letter-spacing:0; font-size:12px;
+    font-variation-settings:"MONO" 1,"wght" 600; color:color-mix(in srgb,var(--ink) 55%,transparent); }
 
   /* ============ TYPE UTILITY ============ */
   .label{
@@ -328,6 +330,7 @@
     display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
   }
   footer .label{ font-size:10px; }
+  footer .seal{ font-size:15px; line-height:1; vertical-align:-2px; letter-spacing:0; }
 
   /* reveal — for sections (gated, only when JS is live to un-hide them) */
   .js .reveal{ opacity:0; transform:translateY(22px); }
@@ -373,7 +376,7 @@
   <nav class="rail" aria-label="Section index">
     <span class="dot">FH</span>
     <span class="tick">AI&nbsp;Engineer&nbsp;·&nbsp;Ottawa</span>
-    <span class="dot" aria-hidden="true">↓</span>
+    <span class="dot code" aria-hidden="true">&lt;/&gt;</span>
   </nav>
 
   <div class="shell">
@@ -457,7 +460,7 @@
 
     <footer>
       <span class="label">Filipe Herculano — Fifo</span>
-      <span class="label">Set in Recursive · 2026</span>
+      <span class="label"><span class="seal" title="志 — kokorozashi (aspiration)">志</span> · 2026</span>
     </footer>
 
   </div>
