@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Assume I don’t know what I don’t know — Filipe Herculano</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href="https://filipeherculano.com/assume-i-dont-know-what-i-dont-know/" />
+    <style>
+      /* One variable font, two voices: Recursive casual for the human,
+         Recursive mono-linear for the machine. Warmth lives inside the
+         terminal slabs; the page around them stays cool porcelain. */
+      @font-face {
+        font-family: "Recursive";
+        src: url("../assets/fonts/recursive-latin.woff2") format("woff2");
+        font-weight: 300 1000;
+        font-display: swap;
+      }
+
+      :root {
+        --porcelain: #f3f4f1;
+        --ink: #23282b;
+        --ink-soft: #5c6468;
+        --slab: #16181a;
+        --slab-ink: #e8e4da;
+        --slab-dim: #9a938a;
+        --prompt: #e2a93b;
+        --ok: #6f9e5c;
+        --rule: #d9dbd5;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --porcelain: #101214;
+          --ink: #d8dad5;
+          --ink-soft: #8b9195;
+          --slab: #191c1f;
+          --slab-ink: #e8e4da;
+          --slab-dim: #8d867d;
+          --prompt: #e2a93b;
+          --ok: #86b573;
+          --rule: #24282b;
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--porcelain); }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Recursive", system-ui, sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.4;
+        font-weight: 380;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      .topbar a,
+      .date,
+      .slab {
+        font-family: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+
+      .topbar {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.25rem 1.25rem 0;
+      }
+      .topbar a {
+        color: var(--ink-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
+      .topbar a:hover,
+      .topbar a:focus-visible { color: var(--ink); }
+
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 4rem;
+      }
+
+      .date {
+        color: var(--ink-soft);
+        font-size: 0.85rem;
+        margin: 0 0 1.25rem;
+      }
+      .date::before { content: "# "; color: var(--prompt); }
+
+      h1 {
+        font-variation-settings: "MONO" 0, "CASL" 1;
+        font-weight: 800;
+        font-size: clamp(1.9rem, 5.5vw, 2.75rem);
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        margin: 0 0 1.75rem;
+      }
+
+      h2 {
+        font-variation-settings: "MONO" 0, "CASL" 0.8;
+        font-weight: 650;
+        font-size: 1.3rem;
+        margin: 2.75rem 0 0.75rem;
+      }
+
+      p { margin: 0 0 1.1rem; }
+      em { font-variation-settings: "MONO" 0, "CASL" 0.9, "slnt" -12; font-style: normal; }
+      a { color: inherit; text-underline-offset: 3px; }
+      a:focus-visible { outline: 2px solid var(--prompt); outline-offset: 2px; }
+
+      /* ---- terminal slabs: the exhibits ---- */
+      .slab {
+        background: var(--slab);
+        color: var(--slab-ink);
+        border-radius: 10px;
+        padding: 1.1rem 1.35rem 1.2rem;
+        margin: 1.75rem -0.25rem 1.9rem;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        overflow-x: auto;
+      }
+      @media (min-width: 52rem) {
+        .slab { margin-inline: -1.75rem; }
+      }
+      @media (prefers-color-scheme: dark) {
+        .slab { border: 1px solid var(--rule); }
+      }
+
+      .slab .cap {
+        display: block;
+        color: var(--slab-dim);
+        font-size: 0.75rem;
+        margin-bottom: 0.85rem;
+        letter-spacing: 0.04em;
+      }
+
+      .slab p { margin: 0; }
+      .slab p + p { margin-top: 0.85rem; }
+
+      .slab .in::before {
+        content: "\276F  ";
+        color: var(--prompt);
+        font-weight: 700;
+      }
+      .slab .out { color: var(--slab-dim); }
+      .slab .out .mem { color: var(--ok); }
+
+      .caret {
+        display: inline-block;
+        width: 0.55em;
+        height: 1.1em;
+        margin-left: 0.15em;
+        vertical-align: text-bottom;
+        background: var(--prompt);
+        animation: blink 1.1s steps(1) infinite;
+      }
+      .caret.quiet { background: var(--ink-soft); }
+      @keyframes blink { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) {
+        .caret { animation: none; opacity: 0.7; }
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px solid var(--rule);
+        margin: 2.75rem auto;
+        width: 5rem;
+      }
+
+      footer {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 0 1.25rem 3rem;
+      }
+      footer a {
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar"><a href="/">&larr; filipe herculano</a></header>
+    <main>
+      <p class="date">2026-07-25 &middot; saturday</p>
+      <h1>Assume I don&rsquo;t know what I don&rsquo;t know</h1>
+
+      <p>This Saturday I sat down to do some overdue housekeeping on my dev setup, and instead of poking at config files myself I typed this into Claude Code:</p>
+
+      <p>This was inspired by <a href="https://x.com/karpathy/status/2079610838143623371" target="_blank" rel="noopener">Karpathy&rsquo;s post</a> on using voice mode to ramble on.</p>
+
+      <div class="slab" role="figure" aria-label="The opening prompt, as typed">
+        <span class="cap">~/sandbox/claude</span>
+        <p class="in">Interview me on my needs and my setup, help me ramble about the state of my workflow and find gaps and opportunities. Be brief, practical, pragmatic, avoid complexity traps and productivity hacks, assume I don&rsquo;t know what I don&rsquo;t know.<span class="caret" aria-hidden="true"></span></p>
+      </div>
+
+      <p>The last line was specially important as it tells the model to challenge my knowledge gaps and give me opportunities to learn and grow without over engineering things.</p>
+
+      <p>That said, at some point it decided my laptop should run a local LLM for summarizing meetings, pulled a 5GB model, and only at <em>runtime</em> it discovered my machine has 16GB of RAM and chronically lives about 7GB deep in swap so I had to interrupt and steer the session:</p>
+
+      <div class="slab" role="figure" aria-label="The pushback, as typed, and what the assistant did with it">
+        <span class="cap">~/sandbox/claude</span>
+        <p class="in">you&rsquo;re making assumptions such as &ldquo;we need a model, go test model&rdquo; &mdash; that&rsquo;s a little optimistic and not an evidence-based approach that has awareness of my environment</p>
+        <p class="out"><span class="mem">&#10003; memory updated</span> &middot; profile-before-prescribing.md &mdash; measure the machine and the real concurrent workload first; let the budget math pick the tool</p>
+      </div>
+
+      <p>After that it profiled the machine, redid the budget for what&rsquo;s <em>actually</em> resident during a call (e.g. the browser tab running the meeting, the terminal jobs, the transcription models, etc) and picked a smaller model the numbers could defend.</p>
+
+      <p>Pushing back also should make the AI permanently better at working with you, if you are often steering it then consider optimizing your prompt or your harness. (It&rsquo;s tempting to just plow through, but it&rsquo;s worth it)</p>
+
+      <hr />
+
+      <h2>&ldquo;The smoking gun&rdquo; as claude would have written this</h2>
+
+      <p>The gaps worth finding are rarely in the config of your harness, they live in whatever you stopped questioning.</p>
+
+      <p>The result of this session allowed me to stop assuming my workflow couldn&rsquo;t improve further and it automated more of my routine towards what I could delegate to new background agents, I highly recommend challenging your setup every once in a while.<span class="caret quiet" aria-hidden="true"></span></p>
+    </main>
+    <footer>
+      <p><a href="/">&larr; back home</a></p>
+    </footer>
+  </body>
+</html>
