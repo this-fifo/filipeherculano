@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jev, building products, and optimizing for the time it takes to make a decision — Filipe Herculano</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href="https://filipeherculano.com/optimizing-for-the-time-it-takes-to-make-a-decision/" />
+    <meta name="description" content="The technology was already there. What Jev shipped was a shorter path to understanding it — and that path is the product." />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Jev, building products, and optimizing for the time it takes to make a decision" />
+    <meta property="og:description" content="The technology was already there. What Jev shipped was a shorter path to understanding it — and that path is the product." />
+    <meta property="og:url" content="https://filipeherculano.com/optimizing-for-the-time-it-takes-to-make-a-decision/" />
+    <meta name="twitter:card" content="summary" />
+    <style>
+      /* One variable font, two voices: Recursive casual for the human,
+         Recursive mono-linear for the machine. Same porcelain/slab world as
+         the previous post; the supporting material (notes, sources, data) is
+         deliberately cooler and quieter than the prose so it never reads as
+         the author's voice. */
+      @font-face {
+        font-family: "Recursive";
+        src: url("../assets/fonts/recursive-latin.woff2") format("woff2");
+        font-weight: 300 1000;
+        font-display: swap;
+      }
+
+      :root {
+        --porcelain: #f3f4f1;
+        --ink: #23282b;
+        --ink-soft: #5c6468;
+        --slab: #16181a;
+        --slab-ink: #e8e4da;
+        --slab-dim: #9a938a;
+        --prompt: #e2a93b;
+        --ok: #6f9e5c;
+        --rule: #d9dbd5;
+        --signal: #c2185b;
+        --accent: #8a5a0b;
+        --card: #ffffff;
+        --card-rule: #cbd0c9;
+      }
+      /* system preference wins unless the reader has explicitly picked light */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --porcelain: #101214;
+          --ink: #d8dad5;
+          --ink-soft: #8b9195;
+          --slab: #191c1f;
+          --slab-ink: #e8e4da;
+          --slab-dim: #8d867d;
+          --prompt: #e2a93b;
+          --ok: #86b573;
+          --rule: #24282b;
+          --signal: #d27e99;
+          --accent: #e2a93b;
+          --card: #171b1e;
+          --card-rule: #333a3f;
+        }
+      }
+      /* explicit override from the site-wide toggle */
+      :root[data-theme="dark"] {
+        --porcelain: #101214;
+        --ink: #d8dad5;
+        --ink-soft: #8b9195;
+        --slab: #191c1f;
+        --slab-ink: #e8e4da;
+        --slab-dim: #8d867d;
+        --prompt: #e2a93b;
+        --ok: #86b573;
+        --rule: #24282b;
+        --signal: #d27e99;
+        --accent: #e2a93b;
+        --card: #171b1e;
+        --card-rule: #333a3f;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--porcelain); scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Recursive", system-ui, sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.4;
+        font-weight: 380;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      .topbar a,
+      .date,
+      .slab,
+      .ex-label,
+      .sn,
+      .sn-ref,
+      .btn,
+      .src li {
+        font-family: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+
+      /* ---- reading progress ---- */
+      .progress {
+        position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+        background: var(--accent); z-index: 9000;
+        transition: width .08s linear;
+      }
+      @media (prefers-reduced-motion: reduce) { .progress { transition: none; } }
+
+      .topbar {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.25rem 1.25rem 0;
+      }
+      .topbar a {
+        color: var(--ink-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
+      .topbar a:hover,
+      .topbar a:focus-visible { color: var(--ink); }
+
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 4rem;
+      }
+
+      .date {
+        color: var(--ink-soft);
+        font-size: 0.85rem;
+        margin: 0 0 1.25rem;
+      }
+      .date::before { content: "# "; color: var(--prompt); }
+
+      h1 {
+        font-variation-settings: "MONO" 0, "CASL" 1;
+        font-weight: 800;
+        font-size: clamp(1.8rem, 5vw, 2.6rem);
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        margin: 0 0 1.75rem;
+      }
+
+      h2 {
+        font-variation-settings: "MONO" 0, "CASL" 0.8;
+        font-weight: 650;
+        font-size: 1.3rem;
+        margin: 2.75rem 0 0.75rem;
+      }
+
+      p { margin: 0 0 1.1rem; }
+      em { font-variation-settings: "MONO" 0, "CASL" 0.9, "slnt" -12; font-style: normal; }
+      a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--signal) 55%, transparent); text-decoration-thickness: 1.5px; }
+      a:hover { text-decoration-color: var(--signal); }
+      a:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+      /* ---- terminal slabs ---- */
+      .slab {
+        background: var(--slab);
+        color: var(--slab-ink);
+        border-radius: 5px;
+        padding: 1.1rem 1.35rem 1.2rem;
+        margin: 1.75rem -0.25rem 1.9rem;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        overflow-x: auto;
+      }
+      @media (min-width: 52rem) { .slab { margin-inline: -1.75rem; } }
+      :root[data-theme="dark"] .slab { border: 1px solid var(--rule); }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .slab { border: 1px solid var(--rule); }
+      }
+
+      .slab .cap {
+        display: block;
+        color: var(--slab-dim);
+        font-size: 0.75rem;
+        margin-bottom: 0.85rem;
+        letter-spacing: 0.04em;
+      }
+      .slab p { margin: 0; }
+      .slab p + p { margin-top: 0.85rem; }
+      .slab .in::before { content: "\276F  "; color: var(--prompt); font-weight: 700; }
+      .slab .out { color: var(--slab-dim); }
+      .slab .out .mem { color: var(--ok); }
+      .slab pre { margin: 0; font: inherit; white-space: pre; }
+      .slab .k { color: var(--prompt); }
+      .slab .g { color: var(--ok); }
+      .slab .d { color: var(--slab-dim); }
+
+      .caret {
+        display: inline-block; width: 0.55em; height: 1.1em;
+        margin-left: 0.15em; vertical-align: text-bottom;
+        background: var(--prompt); animation: blink 1.1s steps(1) infinite;
+      }
+      .caret.quiet { background: var(--ink-soft); }
+      @keyframes blink { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 0.7; } }
+
+      hr {
+        border: 0; border-top: 1px solid var(--rule);
+        margin: 2.75rem auto; width: 5rem;
+      }
+
+      /* =========================================================
+         APPARATUS — everything below is editorial scaffolding,
+         visually distinct from the prose on purpose.
+         ========================================================= */
+
+      /* ---- sidenotes (Tufte-style; CSS-only, works without JS) ---- */
+      .sn-ref {
+        display: inline-block;
+        color: var(--accent);
+        font-size: 0.7rem;
+        font-weight: 700;
+        vertical-align: super;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.12em;
+        border-radius: 2px;
+      }
+      .sn-ref:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+      .sn-ref:focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+      .sn-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+      .sn {
+        display: none;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+      }
+      .sn b { color: var(--ink); font-weight: 650; }
+      .sn .tag {
+        display: block;
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        margin-bottom: 0.35rem;
+      }
+      /* narrow: reveal inline on tap */
+      .sn-toggle:checked + .sn {
+        display: block;
+        margin: 0.7rem 0 1.1rem;
+        padding: 0.7rem 0.9rem;
+        border-left: 2px solid var(--accent);
+        background: var(--card);
+      }
+      /* wide: park them in the right margin, always visible */
+      @media (min-width: 84rem) {
+        main { max-width: 70rem; padding-right: 24.25rem; }
+        .topbar { max-width: 70rem; padding-right: 24.25rem; }
+        footer { max-width: 70rem; padding-right: 24.25rem; }
+        .sn {
+          display: block;
+          float: right; clear: right;
+          width: 20rem;
+          margin: 0.3rem -22.5rem 1.1rem 0;
+          padding-left: 0.9rem;
+          border-left: 1px solid var(--card-rule);
+          text-align: left;
+        }
+        .sn-toggle:checked + .sn {
+          margin: 0.3rem -22.5rem 1.1rem 0;
+          padding: 0 0 0 0.9rem;
+          border-left: 1px solid var(--card-rule);
+          background: none;
+        }
+        .sn-ref { cursor: default; }
+      }
+
+      /* ---- supporting figure shell ---- */
+      .ex {
+        margin: 2.25rem -0.25rem 2.4rem;
+        border: 1px solid var(--card-rule);
+        border-radius: 5px;
+        background: var(--card);
+        overflow: hidden;
+      }
+      @media (min-width: 52rem) { .ex { margin-inline: -1.75rem; } }
+      .ex-head {
+        display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--card-rule);
+      }
+      .ex-label {
+        font-size: 0.7rem; letter-spacing: 0.02em;
+        color: var(--ink-soft); font-weight: 400;
+      }
+      .ex-label::after { content: " /"; opacity: .45; }
+      .ex-title { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+      .ex-body { padding: 1.25rem; }
+      .ex-foot {
+        padding: 0.7rem 1.25rem 0.9rem;
+        border-top: 1px solid var(--card-rule);
+        font-size: 0.74rem; color: var(--ink-soft);
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+
+      .btn {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 4px;
+        border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent);
+        background: transparent; color: var(--ink);
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease, color .15s ease;
+      }
+      .btn:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, transparent); }
+      .btn:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+      .btn[aria-pressed="true"], .btn.on {
+        background: var(--ink); border-color: var(--ink); color: var(--porcelain);
+      }
+      .btn.primary { border-color: var(--ink); font-weight: 600; }
+      .btn.primary:hover { background: var(--ink); color: var(--porcelain); }
+      @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+
+      .row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+      /* ---- EX-02 lineage ---- */
+      .line-wrap { overflow-x: auto; padding-bottom: 0.4rem; }
+      .line {
+        display: flex; align-items: flex-end; gap: 0; min-width: 34rem;
+        border-bottom: 1px solid var(--card-rule);
+        padding-bottom: 0.55rem;
+      }
+      .node {
+        flex: 1 1 0; text-align: center; background: none; border: 0; cursor: pointer;
+        padding: 0.4rem 0.1rem 0; color: var(--ink-soft);
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.68rem;
+      }
+      .node .dot {
+        display: block; width: 9px; height: 9px; border-radius: 50%;
+        margin: 0.4rem auto -0.85rem;
+        background: color-mix(in srgb, var(--ink) 28%, transparent);
+        transition: transform .18s ease, background .18s ease;
+      }
+      .node:hover { color: var(--ink); }
+      .node[aria-selected="true"] { color: var(--accent); font-weight: 700; }
+      .node[aria-selected="true"] .dot { background: var(--accent); transform: scale(1.7); }
+      .node:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; border-radius: 2px; }
+      @media (prefers-reduced-motion: reduce) { .node .dot { transition: none; } }
+      .line-card { margin-top: 1.4rem; min-height: 6.5rem; }
+      .line-card h4 { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 650; }
+      .line-card .yr {
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.72rem; color: var(--accent); letter-spacing: 0.08em;
+      }
+      .line-card p { margin: 0.45rem 0 0; font-size: 0.88rem; line-height: 1.55; color: var(--ink-soft); }
+      .line-card p b { color: var(--ink); font-weight: 600; }
+
+      /* ---- receipts: one bar, then the quotes ---- */
+      .bar { display: flex; width: 100%; height: 34px; border-radius: 3px; overflow: hidden; }
+      .seg {
+        border: 0; padding: 0; cursor: pointer; position: relative;
+        transition: opacity .15s ease;
+        font: inherit; color: transparent;
+        /* flex-basis must govern: min-width:auto would floor each band at its
+           label width and silently distort the proportions. */
+        min-width: 0; overflow: hidden; white-space: nowrap;
+      }
+      .seg:hover { opacity: .82; }
+      .seg:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; z-index: 2; }
+      .bar.picked .seg { opacity: .32; }
+      .bar.picked .seg[aria-pressed="true"] { opacity: 1; }
+      @media (prefers-reduced-motion: reduce) { .seg { transition: none; } }
+
+      .legend {
+        display: flex; flex-wrap: wrap; gap: 0.35rem 1.3rem;
+        margin: 0.8rem 0 0; padding: 0; list-style: none;
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.73rem; color: var(--ink-soft);
+      }
+      .legend li { display: flex; }
+      .legend .lg {
+        display: flex; align-items: baseline; gap: 0.4rem;
+        background: none; border: 0; padding: 0.3rem 0; margin: 0;
+        font: inherit; color: inherit; cursor: pointer; text-align: left;
+      }
+      .legend .lg:hover { color: var(--ink); }
+      .legend .lg:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; border-radius: 2px; }
+      .legend .lg[aria-pressed="true"] { color: var(--ink); }
+      .legend .lg[aria-pressed="true"] b { text-decoration: underline; text-underline-offset: 3px; }
+      .legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 auto; transform: translateY(1px); }
+      .legend b { color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+      .bar-note {
+        margin: 1rem 0 1.4rem; font-size: 0.84rem; line-height: 1.55; color: var(--ink-soft);
+        padding-left: 0.8rem; border-left: 2px solid var(--accent);
+      }
+      .bar-note b { color: var(--ink); font-weight: 600; }
+
+      .qlist { display: block; }
+      .q {
+        padding: 0.62rem 0 0.62rem 0;
+        border-top: 1px solid var(--card-rule);
+        font-size: 0.85rem; line-height: 1.55;
+      }
+      .q.hide { display: none; }
+      .q .qa {
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.7rem; color: var(--ink-soft); margin-right: 0.55rem;
+      }
+      .q .qa a { color: var(--ink-soft); }
+
+      /* ---- the 2007 comment, kept in its original colours so it never
+             reads as the author's own voice, in either theme ---- */
+      .quotefig { margin: 2.4rem -0.25rem 2.6rem; }
+      @media (min-width: 52rem) { .quotefig { margin-inline: -1.75rem; } }
+      .hn2007 {
+        background: #f6f6ef; color: #1a1a1a;
+        border: 1px solid #e3e3d8; border-radius: 4px;
+        padding: 1rem 1.15rem;
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 0.79rem; line-height: 1.5;
+      }
+      .hn2007 .hdr { color: #828282; font-size: 0.7rem; margin-bottom: 0.75rem; }
+      .hn2007 .hdr a { color: #828282; text-decoration-color: #b0b0b0; }
+      .hn2007 p { margin: 0 0 0.65rem; }
+      .hn2007 p:last-child { margin-bottom: 0; }
+      .quotefig .attrib {
+        margin: 0.8rem 0 0;
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.72rem; color: var(--ink-soft);
+      }
+      .quotefig .after {
+        margin: 1.5rem 0 0; padding-top: 1.1rem;
+        border-top: 1px solid var(--card-rule);
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 1.1rem;
+      }
+      .quotefig .after .n {
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 1.25rem; font-weight: 700; color: var(--ink); display: block;
+        font-variant-numeric: tabular-nums;
+      }
+      .quotefig .after a { display: block; text-decoration: none; }
+      .quotefig .after a:hover .n { color: var(--accent); }
+      .quotefig .after .l { font-size: 0.71rem; color: var(--ink-soft); line-height: 1.45; display: block; margin-top: 0.2rem; }
+
+      .ex.bare { border: 0; background: none; border-radius: 0; }
+      .ex.bare .ex-body { padding: 1.2rem 0; }
+
+      .srcline {
+        margin-top: 0.85rem;
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: 0.71rem; color: var(--ink-soft); line-height: 1.5;
+      }
+      .srcline a { color: var(--ink); }
+
+      /* ---- ten thousand ---- */
+      #tenk .big {
+        font-family: "Recursive", ui-monospace, Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+        font-size: clamp(2.6rem, 11vw, 4.4rem);
+        font-weight: 800; line-height: 1; color: var(--accent);
+        font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+      }
+      #tenk .cap2 { font-size: 0.86rem; color: var(--ink-soft); margin-top: 0.7rem; line-height: 1.55; }
+      #tenk .subject { color: var(--ink); font-weight: 600; }
+
+      /* ---- code comparison ---- */
+      .tabs { margin-bottom: 0.9rem; }
+      .pane { display: none; }
+      .pane.on { display: block; }
+
+      /* ---- sources ---- */
+      .src { margin: 0; padding: 0; list-style: none; }
+      .src li {
+        font-size: 0.76rem; line-height: 1.5; color: var(--ink-soft);
+        padding: 0.42rem 0; border-bottom: 1px solid var(--card-rule);
+        display: flex; gap: 0.7rem;
+      }
+      .src li:last-child { border-bottom: 0; }
+      .src .n { color: var(--ink-soft); flex: 0 0 1.6rem; }
+      .src a { color: var(--ink); }
+
+      footer {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 0 1.25rem 4rem;
+      }
+      footer a { color: var(--ink-soft); font-size: 0.9rem; }
+
+      /* ---- theme toggle (same affordance as the home page) ---- */
+      .theme-toggle {
+        position: fixed; right: 18px; bottom: 18px; z-index: 9000;
+        width: 42px; height: 42px; border-radius: 50%;
+        display: grid; place-items: center; cursor: pointer;
+        background: var(--porcelain); color: var(--ink);
+        border: 1.5px solid color-mix(in srgb, var(--ink) 32%, transparent);
+        box-shadow: 0 4px 16px rgba(0,0,0,.14);
+        transition: transform .2s ease, background .3s ease, color .3s ease, border-color .3s ease;
+      }
+      .theme-toggle:hover { transform: translateY(-2px); }
+      .theme-toggle:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+      .theme-toggle svg { width: 18px; height: 18px; }
+      .theme-toggle .ic-sun { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-moon { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-sun { display: block; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: none; }
+        :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: block; }
+      }
+      @media (prefers-reduced-motion: reduce) { .theme-toggle { transition: none; } }
+
+      .disclaimer.tight { margin: -0.4rem 0 1.6rem; }
+
+      .disclaimer {
+        font-size: 0.78rem; line-height: 1.55; color: var(--ink-soft);
+        border-left: 2px solid var(--card-rule);
+        padding: 0.15rem 0 0.15rem 0.8rem;
+        margin: 0 0 2.2rem;
+      }
+
+      .noscript {
+        font-size: 0.8rem; color: var(--ink-soft);
+        border-left: 2px solid var(--prompt); padding: 0.5rem 0.8rem; margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+    <header class="topbar"><a href="/">&larr; filipe herculano</a></header>
+
+    <main>
+      <p class="date">2026-09-21 &middot; monday</p>
+      <h1>Jev, building products, and optimizing for the time it takes to make a decision</h1>
+
+      <p class="disclaimer"><b>Disclaimer:</b> I wrote this but Codex running on Sakana Fugu did the styling and added the links/references/etc following my instructions over a few prompts.</p>
+
+      <p>I have been meaning to write about what it takes, other than great engineering, to launch a successful product and I find the <a href="https://typesafe.ai/" target="_blank" rel="noopener">TypeSafe</a> frenzy a great timing to share my views.</p>
+
+      <p>As a technical founder, it&rsquo;s so easy to fall into the trap of believing that because your engineering is sound it will need no introduction. Engineers suffer from the <a href="https://en.wikipedia.org/wiki/Curse_of_knowledge" target="_blank" rel="noopener">curse of knowledge</a><label class="sn-ref" for="sn-cok" tabindex="0" role="button" aria-label="Show note">1</label><input type="checkbox" id="sn-cok" class="sn-toggle" /><span class="sn"><span class="tag">Note 1</span><b>Curse of knowledge.</b> Named by <a href="https://doi.org/10.1086/261651" target="_blank" rel="noopener">Camerer, Loewenstein &amp; Weber</a>, <em>Journal of Political Economy</em> 97 (1989): better-informed agents cannot discount what they know when modelling someone who does not know it.</span>, it can be frustrating to be sitting at the innovation of technology and balancing having to consistently stay disciplined enough to practice self-awareness outside your bubble. To remind yourself, whoever is sitting behind the screen and about to make a decision on if they should trust your work may not know enough about the subject as you do.</p>
+
+      <p>I believe this is why we see a lot of lag between academics and applied technology in the form of businesses. Though that&rsquo;s not what I want to write about. Forget the academics or business angle aside, let&rsquo;s talk about communication.</p>
+
+      <p>If you wrote code for a living you certainly might have come across compiled programming languages at least once in your life. The thing with compiled programming languages, and especially strongly typed ones, is that they allow a certain kind of &ldquo;prediction&rdquo; over behaviours in the code. There is something magical about having a compiler tell you when you made a mistake and preventing bugs from making it into your software before it executes in front of the end user or program. Then there&rsquo;s <a href="https://en.wikipedia.org/wiki/Static_program_analysis" target="_blank" rel="noopener">static analysis</a> tools, and things like <a href="https://learn.microsoft.com/en-us/visualstudio/ide/using-intellisense" target="_blank" rel="noopener">IntelliSense</a><label class="sn-ref" for="sn-roslyn" tabindex="0" role="button" aria-label="Show note">2</label><input type="checkbox" id="sn-roslyn" class="sn-toggle" /><span class="sn"><span class="tag">Note 2</span><b>IntelliSense &amp; Roslyn.</b> IntelliSense is an editor feature and dates to 1996. Roslyn is the compiler platform, open-sourced in 2014, that lets other tools query the compiler&rsquo;s own model of the code.</span> or <a href="https://github.com/dotnet/roslyn" target="_blank" rel="noopener">Roslyn</a> APIs for code analysis (using C# as an example here, but that is not really the point you should focus on).</p>
+
+      <p>Tools that let you operate on top and around the code, aided by a compiler and by data contracts that can be executed very fast, allowed something even more magical. Now you don&rsquo;t need to wait for the compiler, you can have something operating in a file telling you right then and there a suggestion on command. First I didn&rsquo;t know what to do with that, when writing code, code can be about anything and everything. What suggestion is the ideal one? Well, the naive idea would be to think &ldquo;anything that is allowed by the compiler, of course&rdquo;, but you quickly would realize some, despite being sound to the compiler, are just dead wrong. You see, not everything is relevant or useful and that the context of your program is what determines the relevance and applicability of accepting a suggestion.</p>
+
+      <p>This brought us to better tools, they could scan and understand project context, and even operate under set of rules defined by the user at the project space, so that they get better at giving you what you need when you need it. <a href="https://www.jetbrains.com/rider/" target="_blank" rel="noopener">Rider</a>&rsquo;s <a href="https://www.jetbrains.com/resharper/" target="_blank" rel="noopener">ReSharper</a><label class="sn-ref" for="sn-rider" tabindex="0" role="button" aria-label="Show note">3</label><input type="checkbox" id="sn-rider" class="sn-toggle" /><span class="sn"><span class="tag">Note 3</span><b>ReSharper &amp; Rider.</b> ReSharper launched as a Visual&nbsp;Studio extension in 2004. Rider is a separate IDE that runs the ReSharper engine as its backend.</span> is one example here, it could produce on the fly code quality analysis that are sensitive to your project and smarter than the C# compiler, it helped with things like null referencing, list enumeration, and even large scale refactoring accounting for imports. Boy how glorious it felt using it. Programming was so fun, you could focus on the core logic of what you were doing, and not stress out about forgetting some verbosity of the language design in how it had chosen to give you certain types of guarantees.</p>
+
+      <p>What does any of this have to do with Jev? I will get there, but let&rsquo;s talk about <a href="https://cursor.com/" target="_blank" rel="noopener">Cursor</a> first. Heh!</p>
+
+      <p>Cursor came along and basically reinvented all of the things I shared above, for everything, not just C#. They really were just an autocomplete UX reinvented with modern tooling. The technology behind it was already there. People were already copy-pasting text and copy-pasting it back. I mean, for those of you that were not on compilers, and strongly typed languages, maybe you had your own version of that in a homegrown way, like coding snippets, <a href="https://stackoverflow.com/" target="_blank" rel="noopener">StackOverflow</a> gotchas, etc.</p>
+
+      <figure class="ex" id="lineage">
+        <figcaption class="ex-head">
+          <span class="ex-label">timeline</span>
+          <span class="ex-title">&ldquo;The technology was already there&rdquo;</span>
+        </figcaption>
+        <div class="ex-body">
+          <noscript><p class="noscript">Interactive timeline needs JavaScript. The sequence: IntelliSense (1997) &middot; ReSharper (2004) &middot; <em>Thinking, Fast and Slow</em> (2011) &middot; Roslyn open-sourced (2014) &middot; BERT (2018) &middot; Copilot (2021) &middot; Cursor (2023) &middot; GLiNER (2023) &middot; Jev (2026).</p></noscript>
+          <div class="line-wrap">
+            <div class="line" id="line" role="tablist" aria-label="Prior art timeline"></div>
+          </div>
+          <div class="line-card" id="line-card" role="tabpanel" aria-live="polite"></div>
+        </div>
+        <div class="ex-foot">Hover or click any year.</div>
+      </figure>
+
+      <p>Why was Cursor so successful in overtaking everyone&rsquo;s workflow overnight? Because they nailed the approach to requiring no explanation when selling you on the underlying magic. You didn&rsquo;t have to understand how it worked; you just had to use it, and they really lowered the bar on using it.</p>
+
+      <p>We had some Cursor-like products in IDEs before them as well, such as tools that allow you to have an inline REPL over your program so you can watch computation happen as you write code.<label class="sn-ref" for="sn-repl" tabindex="0" role="button" aria-label="Show note">4</label><input type="checkbox" id="sn-repl" class="sn-toggle" /><span class="sn"><span class="tag">Note 4</span><b>The canonical ancestors.</b> Bret Victor&rsquo;s <a href="https://vimeo.com/36579366" target="_blank" rel="noopener">Inventing on Principle</a> (CUSEC, 2012) argued creators need an immediate connection to what they make; Chris Granger&rsquo;s <a href="https://github.com/LightTable/LightTable" target="_blank" rel="noopener">Light Table</a> (2012, Kickstarted) implemented it, and <a href="https://quokkajs.com/" target="_blank" rel="noopener">Quokka.js</a> still ships the inline-value idea into VS Code today.</span> Granted this isn&rsquo;t the same, but it&rsquo;s a sort of similar design to a similar problem. Maybe the problem of answering a question &ldquo;in the moment&rdquo; and unblocking your next step? Anyways, not important, hopefully you get what I mean here. The point is, the innovation wasn&rsquo;t really a new technology per-se, but a new approach, a new medium, and a way to consume and use it that fit better with the mental model of the consumer.</p>
+
+      <p>Now let&rsquo;s talk Jev.</p>
+
+      <p>The mental model of a consumer is often the biggest overlooked thing by engineers. Especially so when they also happen to be in the intersection of customers of their own products. They will often fail to realize how packaging, marketing, and distribution of a product have less to do with an engineer&rsquo;s mental model for building the product itself than it does for selling it to a larger audience.</p>
+
+      <p>Right, how does this have anything to do with Jev? Well, they had a really amazing launch. Time is yet to tell if it is going to be a Cursor-like phenomenon, but the trend is certainly showing great signs for them. However, just like when Cursor launched, lots and lots of engineers were bringing on the &ldquo;another day, another vscode fork&rdquo; type of hate towards it, we are seeing the same with Jev. Most of the strong opinions seem to come from a position of those who deeply understand the machinery of it and quickly find themselves within the cognitive distortion of struggling to see how the strong adoption is justified when the technology to use it was there all along this whole time. This isn&rsquo;t anything new to markets either, as someone pointed out in HN, you could say &ldquo;<a href="https://news.ycombinator.com/item?id=49765997" target="_blank" rel="noopener">Jev is just BERT</a>&rdquo; and then again &ldquo;Dropbox is just an ftp account mounted with curlftpfs!&rdquo;<label class="sn-ref" for="sn-curl" tabindex="0" role="button" aria-label="Show note">5</label><input type="checkbox" id="sn-curl" class="sn-toggle" /><span class="sn"><span class="tag">Note 5</span><a href="https://news.ycombinator.com/item?id=49769116" target="_blank" rel="noopener" data-label="johnfn on Hacker News">johnfn on Hacker News</a>, 19 September 2026.</span></p>
+
+      <figure class="ex" id="wall">
+        <figcaption class="ex-head">
+          <span class="ex-label">HN threads on Jev</span>
+          <span class="ex-title">What people were actually arguing about</span>
+        </figcaption>
+        <div class="ex-body">
+          <noscript><p class="noscript">Needs JavaScript. Jev marked 541 of 906 non-deleted comments as substantive and on topic. Of those, 45% were about something outside this essay&rsquo;s four arguments, 25% wanted numbers, 15% said it already existed, 10% saw a real advance, and 5% argued the packaging was the point. Threads: <a href="https://news.ycombinator.com/item?id=49717558" target="_blank" rel="noopener">the launch</a>, <a href="https://news.ycombinator.com/item?id=49765348" target="_blank" rel="noopener">the prior-art claim</a>, <a href="https://news.ycombinator.com/item?id=49783999" target="_blank" rel="noopener">Kev</a>.</p></noscript>
+          <div class="bar" id="wall-bar"></div>
+          <ul class="legend" id="wall-legend"></ul>
+          <p class="bar-note" id="wall-note"></p>
+          <div class="qlist" id="wall-list"></div>
+        </div>
+        <div class="ex-foot">Run on <code>jev-1.13.0</code>, 21 September 2026. <a href="jev-hn-classification.json">Download the classifications.</a></div>
+      </figure>
+
+      <figure class="quotefig" id="dropbox">
+        <div class="hn2007">
+          <div class="hdr">BrandonM &middot; 5 April 2007 &middot; on <a href="https://news.ycombinator.com/item?id=8863" target="_blank" rel="noopener" data-label="Show HN: Dropbox">My YC app: Dropbox &mdash; Throw away your USB drive</a></div>
+          <p>I have a few qualms with this app:</p>
+          <p>1. For a Linux user, you can already build such a system yourself quite trivially by getting an FTP account, mounting it locally with curlftpfs, and then using SVN or CVS on the mounted filesystem. From Windows or Mac, this FTP account could be accessed through built-in software.</p>
+          <p>2. It doesn&rsquo;t actually replace a USB drive. Most people I know e-mail files to themselves or host them somewhere online to be able to perform presentations, but they still carry a USB drive in case there are connectivity problems. This does not solve the connectivity issue.</p>
+          <p>3. It does not seem very &ldquo;viral&rdquo; or income-generating. I know this is premature at this point, but without charging users for the service, is it reasonable to expect to make money off of this?</p>
+        </div>
+        <p class="attrib"><a href="https://news.ycombinator.com/item?id=9224" target="_blank" rel="noopener" data-label="BrandonM on Dropbox, 2007">news.ycombinator.com/item?id=9224</a></p>
+        <div class="after">
+          <a href="https://investors.dropbox.com/news-releases/news-release-details/dropbox-announces-fourth-quarter-and-fiscal-2025-results" target="_blank" rel="noopener" data-label="Dropbox FY2025 results"><span class="n">700M+</span><span class="l">registered users</span></a>
+          <a href="https://investors.dropbox.com/news-releases/news-release-details/dropbox-announces-fourth-quarter-and-fiscal-2025-results" target="_blank" rel="noopener"><span class="n">18.08M</span><span class="l">paying users, Q4 2025</span></a>
+          <a href="https://investors.dropbox.com/news-releases/news-release-details/dropbox-announces-fourth-quarter-and-fiscal-2025-results" target="_blank" rel="noopener"><span class="n">$2.521B</span><span class="l">revenue, FY2025</span></a>
+        </div>
+      </figure>
+
+      <p>Okay, then what is Jev? What&rsquo;s this <a href="https://arxiv.org/abs/1810.04805" target="_blank" rel="noopener">BERT</a><label class="sn-ref" for="sn-bert" tabindex="0" role="button" aria-label="Show note">6</label><input type="checkbox" id="sn-bert" class="sn-toggle" /><span class="sn"><span class="tag">Note 6</span><b>BERT</b> (Google, 2018) reads a whole sentence at once and hands back numbers instead of writing text back at you. The name is a Sesame Street joke, and the field kept going: ELMo, ERNIE, Big Bird, Grover. So engineers do name things carefully. They just name them for people already in on the joke.</span> thing? See, that is the point of Jev. I don&rsquo;t have to tell you what BERT is, and that&rsquo;s the point I am making. Actually, perhaps for a very junior engineer, both things are just weird nouns that sound like someone&rsquo;s name, just think about that. Names. Imagine knowing so much about something, being so blessed with knowledge, that from a single word you can understand how to instantly build it. There&rsquo;s a <a href="https://xkcd.com/1053/" target="_blank" rel="noopener">xkcd</a> article I like that brings this self awareness that for each thing &ldquo;everyone knows&rdquo; by the time they&rsquo;re adults, every day there are, on average, ten thousand people hearing about it for the first time. Nailing product market fit is kinda like cracking the delivery of solved problems to these many ten thousand people popping up each day helping shape our industry through the evolution of how society and humans choose to interact.</p>
+
+      <figure class="ex bare" id="tenk">
+        <div class="ex-body">
+          <div class="big" id="tenk-n">0.0</div>
+          <p class="cap2">people, roughly, met <span class="subject" id="tenk-subject">BERT</span> for the first time while you read this page &mdash; going by <a href="https://xkcd.com/1053/" target="_blank" rel="noopener">xkcd&rsquo;s</a> arithmetic, one every 8.64 seconds.<br />
+            <button class="btn" id="tenk-next" type="button" style="margin-top:0.7rem;">Try another thing &ldquo;everyone knows&rdquo;</button></p>
+        </div>
+      </figure>
+
+      <p>One way I practice being aware of this while doing anything is remembering quotes like <a href="https://www.biblegateway.com/passage/?search=Ecclesiastes%201%3A9&amp;version=NIV" target="_blank" rel="noopener">Ecclesiastes 1:9</a> &ldquo;What has been will be again, what has been done will be done again; there is nothing new under the sun.&rdquo; or <a href="https://en.wikipedia.org/wiki/Antoine_Lavoisier" target="_blank" rel="noopener">Lavoisier</a>&rsquo;s &ldquo;In nature nothing is created nothing is lost, everything changes&rdquo;.</p>
+
+      <p class="disclaimer tight"><b>Fun fact:</b> when having Codex help me publish this, it helped me learned that actually <a href="https://plato.stanford.edu/entries/anaxagoras/" target="_blank" rel="noopener">Anaxagoras</a> and <a href="https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.02.0131:book=1:card=146" target="_blank" rel="noopener">Lucretius</a> were arguing about the same much earlier. The first basically said that things don&rsquo;t really appear or disappear, they mix and separate, while the latter said &ldquo;nothing from nothing ever yet was born&rdquo;. The cool twist is that it still reads to me like the same thought getting re-cut for a new audience only two and a half thousand years apart. Which is sort of my whole point.</p>
+
+      <p>Jev&rsquo;s innovation went beyond just classical machine learning that &ldquo;everyone knows&rdquo; and was already using. They created a standard application interface with data contracts and core primitives crafted for the existing software paradigm in a way that landed exactly where it hurt in the market. System One Model reads much softer than BERT, even my wife, who doesn&rsquo;t program or knows engineering, was able to understand &ldquo;Model&rdquo; referred to &ldquo;AI&rdquo; as in &ldquo;the tool she uses&rdquo; whereas BERT sounded like someone to her, whereas System One she understood as a primitive. Jev also got into using the <a href="https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow" target="_blank" rel="noopener">Fast and Slow</a> analogy to explain each,<label class="sn-ref" for="sn-kahneman" tabindex="0" role="button" aria-label="Show note">7</label><input type="checkbox" id="sn-kahneman" class="sn-toggle" /><span class="sn"><span class="tag">Note 7</span><b>System 1 / System 2 is not Kahneman&rsquo;s coinage.</b> He adopted the labels from Stanovich &amp; West (2000) and says so in <em>Thinking, Fast and Slow</em> (2011). Two things worth holding: the dual-process framing is contested in cognitive science, and in 2017 Kahneman publicly conceded that the book&rsquo;s chapter on social priming rested on evidence he had over-trusted.</span> which I find is a really great mental model when focusing purely on applications of using it. Even during onboarding, I got a modal that asked whether I was ready to use it and challenged me to check my understanding.</p>
+
+      <figure class="ex" id="contract">
+        <figcaption class="ex-head">
+          <span class="ex-title">Working with a classifier over time</span>
+        </figcaption>
+        <div class="ex-body">
+          <noscript><p class="noscript">Needs JavaScript. The three references: <a href="https://github.com/huggingface/transformers/blob/d53e587669ec639a422ca33f3711b48f24cdf135/examples/pytorch/text-classification/README.md#L87-L108" target="_blank" rel="noopener">Transformers&rsquo; text-classification README</a>, <a href="https://github.com/567-labs/instructor/blob/e12f8b49203b0c1f253d27c1e709d0a09b9fc5a8/examples/classification/simple_prediction.py#L10-L37" target="_blank" rel="noopener">Instructor&rsquo;s classification example</a>, and <a href="https://github.com/browser-use/jev-ultrafast/blob/1231850a0bf1a0c0341fe408ef1668dbbfdfac46/jev_ultrafast/model.py#L81-L119" target="_blank" rel="noopener">Browser Use&rsquo;s Jev agent loop</a>.</p></noscript>
+          <div class="row tabs" id="ct-tabs"></div>
+          <div id="ct-panes"></div>
+        </div>
+      </figure>
+
+
+      <p>It&rsquo;s not all packaging either, with Jev you can make up a schema and it just answers without needing labels or training, plus they have a larger context window than the clones out there. Curious to see if they will publish more around the architecture or if another competitor will solve for that yet.</p>
+
+      <p>Many are pointing out defensibility and moat of their tech, and while that may be valid, where are all the ftp accounts mounted with curlftpfs since <a href="https://news.ycombinator.com/item?id=8863" target="_blank" rel="noopener">Dropbox launched</a> in 2008? Well, turns out that after shipping a product there&rsquo;s the whole next chapter of it which is sustaining a relationship with your customers. In the early days of <a href="https://stripe.com/" target="_blank" rel="noopener">Stripe</a>, they were famous for being a very horizontal organization internally and it was all hands on deck for Support, the same engineers building the product were there to take calls from customers, the people selling, even their CEO.<label class="sn-ref" for="sn-stripe" tabindex="0" role="button" aria-label="Show note">8</label><input type="checkbox" id="sn-stripe" class="sn-toggle" /><span class="sn"><span class="tag">Note 8</span>Paul Graham&rsquo;s <a href="https://paulgraham.com/ds.html" target="_blank" rel="noopener">Do Things That Don&rsquo;t Scale</a> (2013), which names the &ldquo;Collison installation&rdquo;: rather than emailing a signup link, the Collisons would ask &ldquo;give me your laptop&rdquo; and set the merchant up on the spot.</span> That was just as important for growing self-awareness of how your product lands outside your bubble, as it was for managing the relationship with those behind the screen making decisions to trust your work.</p>
+
+      <p>Lastly, Jev onboarding says to only ask it for the kind of judgment <a href="https://docs.typesafe.ai/primitives" target="_blank" rel="noopener">a knowledgeable person makes in a second</a>, given the right context. So they optimized it for the time it takes software to make a decision, and in their marketing strategy they optimized for the time it takes you to make one about them too.</p>
+
+      <p>Alright, I&rsquo;m gonna pause here. Hopefully this was a fun read, I could have gone deeper into things but I&rsquo;m still figuring out how I want to blog and write, and these days there&rsquo;s too much noise everywhere.</p>
+
+      <p>Go try <a href="https://typesafe.ai/" target="_blank" rel="noopener">Jev</a>, it&rsquo;s fun, or <a href="https://github.com/jaredpalmer/kev" target="_blank" rel="noopener">join</a> <a href="https://laya.convaiinnovations.com/" target="_blank" rel="noopener">the</a> <a href="https://github.com/deepanwadhwa/OpenDecision" target="_blank" rel="noopener">party</a> <a href="https://github.com/ekzhang/openjev-sglang" target="_blank" rel="noopener">into</a> <a href="https://sgnt.ai/p/jev/" target="_blank" rel="noopener">making</a> <a href="https://news.ycombinator.com/item?id=49784846" target="_blank" rel="noopener">your own</a>,<label class="sn-ref" for="sn-own" tabindex="0" role="button" aria-label="Show note">9</label><input type="checkbox" id="sn-own" class="sn-toggle" /><span class="sn"><span class="tag">Note 9</span><b>People took this literally within a week.</b> <a href="https://github.com/jaredpalmer/kev" target="_blank" rel="noopener">Kev</a> (Jared Palmer) on Qwen3.5, <a href="https://laya.convaiinnovations.com/" target="_blank" rel="noopener">Laya</a> (ConvAI), <a href="https://github.com/deepanwadhwa/OpenDecision" target="_blank" rel="noopener">OpenDecision</a>, <a href="https://github.com/ekzhang/openjev-sglang" target="_blank" rel="noopener">openjev-sglang</a>, and by one HN count three separate projects calling themselves &ldquo;openjev&rdquo;. The trick itself is <a href="https://sgnt.ai/p/jev/" target="_blank" rel="noopener">written up publicly</a>.</span> in any case just remember that communication is everything.<span class="caret quiet" aria-hidden="true"></span></p>
+
+      <hr />
+
+      <!-- ============ SOURCES ============ -->
+      <h2 id="sources">Sources &amp; further reading</h2>
+      <ol class="src" id="src-list"></ol>
+    </main>
+
+    <footer>
+      <p><a href="/">&larr; back home</a></p>
+    </footer>
+
+    <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+
+    <script>
+    (function(){
+      "use strict";
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* ---------- theme toggle (shares the site-wide localStorage key) ---------- */
+      (function(){
+        var root = document.documentElement, btn = document.querySelector(".theme-toggle");
+        function isDark(){
+          var a = root.getAttribute("data-theme");
+          if (a) return a === "dark";
+          return window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+        function set(dark){
+          root.setAttribute("data-theme", dark ? "dark" : "light");
+          btn.setAttribute("aria-pressed", dark ? "true" : "false");
+          try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch(e){}
+        }
+        btn.setAttribute("aria-pressed", isDark() ? "true" : "false");
+        btn.addEventListener("click", function(){ set(!isDark()); });
+      })();
+
+      /* ---------- sidenote refs: keyboard parity with click ---------- */
+      (function(){
+        document.querySelectorAll(".sn-ref").forEach(function(ref){
+          ref.addEventListener("keydown", function(e){
+            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
+              e.preventDefault();
+              var box = document.getElementById(ref.getAttribute("for"));
+              if (box) { box.checked = !box.checked; ref.setAttribute("aria-expanded", box.checked ? "true" : "false"); }
+            }
+          });
+          ref.setAttribute("aria-expanded", "false");
+          ref.addEventListener("click", function(){
+            var box = document.getElementById(ref.getAttribute("for"));
+            if (box) setTimeout(function(){ ref.setAttribute("aria-expanded", box.checked ? "true" : "false"); }, 0);
+          });
+        });
+      })();
+
+      /* ---------- reading progress ---------- */
+      (function(){
+        var bar = document.getElementById("progress"), ticking = false;
+        function draw(){
+          var h = document.documentElement.scrollHeight - window.innerHeight;
+          bar.style.width = (h > 0 ? Math.min(100, (window.scrollY / h) * 100) : 0) + "%";
+          ticking = false;
+        }
+        window.addEventListener("scroll", function(){
+          if (!ticking) { ticking = true; window.requestAnimationFrame(draw); }
+        }, { passive: true });
+        draw();
+      })();
+
+      /* ---------- timeline ---------- */
+      (function(){
+        var NODES = [
+          { y: "1997", n: "IntelliSense",
+            d: "Ships in Visual Basic 5.0 and Visual C++ 5.0. <b>Autocomplete over a symbol table is already a solved problem.</b> It is so ordinary within a decade that nobody calls it AI, or calls it anything at all.",
+            u: "https://learn.microsoft.com/en-us/visualstudio/ide/using-intellisense" },
+          { y: "2004", n: "ReSharper 1.0",
+            d: "JetBrains ships project-wide static analysis as a Visual Studio extension: null-reference inspection, multiple-enumeration warnings, import-aware refactoring. <b>Context-sensitive suggestion, nineteen years before the chat box.</b>",
+            u: "https://www.jetbrains.com/resharper/" },
+          { y: "2011", n: "Thinking, Fast and Slow",
+            d: "Kahneman popularises System&nbsp;1 / System&nbsp;2 \u2014 labels he takes from Stanovich &amp; West (2000). <b>The vocabulary Jev would borrow fifteen years later to make a classifier legible.</b>",
+            u: "https://en.wikipedia.org/wiki/Thinking,_Fast_and_Slow" },
+          { y: "2014", n: "Roslyn open-sourced",
+            d: "Microsoft releases the .NET compiler platform under Apache 2.0. <b>The compiler becomes an API.</b> Everyone can now build tools that see code the way the compiler sees it.",
+            u: "https://github.com/dotnet/roslyn" },
+          { y: "2018", n: "BERT",
+            d: "Devlin et al. publish the encoder-only transformer that carries production NLP for the next eight years. <b>The capability people now point at when they say \u201Cthis already existed\u201D.</b> They are not wrong about the capability.",
+            u: "https://arxiv.org/abs/1810.04805" },
+          { y: "2021", n: "GitHub Copilot",
+            d: "Autocomplete, but generative, and inside the editor you already had. <b>Same interaction, new engine.</b> The preview is the marketing.",
+            u: "https://github.blog/news-insights/product-news/introducing-github-copilot-ai-pair-programmer/" },
+          { y: "2023", n: "Cursor",
+            d: "Anysphere forks VS Code. <b>Nothing in the stack is novel</b> \u2014 the models are other people's, the editor is Microsoft's. The packaging is theirs, and it is the thing that wins.",
+            u: "https://cursor.com/" },
+          { y: "2023", n: "GLiNER",
+            d: "Zaratiana et al. publish a compact bidirectional model for zero-shot extraction against arbitrary user-supplied labels. <b>Schema-driven, no fine-tuning.</b> HN commenters reached for it as the closer prior art to Jev than BERT.",
+            u: "https://arxiv.org/abs/2311.08526" },
+          { y: "2026", n: "Jev",
+            d: "After two years in stealth, TypeSafe wraps the category in two words \u2014 <b>\u201CSystem One model\u201D</b> \u2014 gives it three typed primitives and an SDK, and ships on 15 September. The launch post hits <b>1,934 points and 171 comments</b> on HN in a day; open implementations of the same contract follow within the week.",
+            u: "https://news.ycombinator.com/item?id=49717558" }
+        ];
+
+        var line = document.getElementById("line"), card = document.getElementById("line-card");
+        if (!line) return;
+        var btns = [];
+
+        function select(idx){
+          btns.forEach(function(b, j){
+            var active = j === idx;
+            b.setAttribute("aria-selected", active ? "true" : "false");
+            b.tabIndex = active ? 0 : -1;
+          });
+          var n = NODES[idx];
+          card.setAttribute("aria-labelledby", btns[idx].id);
+          card.innerHTML = '<span class="yr">' + n.y + '</span><h4>' + n.n + "</h4><p>" + n.d +
+            ' <a href="' + n.u + '" target="_blank" rel="noopener" data-label="' + n.n + " \u00B7 " + n.y + '">&rarr;</a></p>';
+        }
+        NODES.forEach(function(n, idx){
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "node"; b.setAttribute("role", "tab");
+          b.id = "line-tab-" + idx;
+          b.setAttribute("aria-controls", "line-card");
+          b.setAttribute("aria-selected", "false");
+          b.tabIndex = -1;
+          b.innerHTML = n.y + '<span class="dot"></span>';
+          b.addEventListener("click", function(){ select(idx); });
+          b.addEventListener("mouseenter", function(){ select(idx); });
+          b.addEventListener("focus", function(){ select(idx); });
+          b.addEventListener("keydown", function(e){
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft"){
+              e.preventDefault();
+              var next = (idx + (e.key === "ArrowRight" ? 1 : NODES.length - 1)) % NODES.length;
+              btns[next].focus(); select(next);
+            }
+          });
+          btns.push(b); line.appendChild(b);
+        });
+        select(NODES.length - 1);
+      })();
+
+      /* ---------- receipts · classified by Jev ---------- */
+      (function(){
+        var D = [
+ {
+  "k": "prior_art",
+  "label": "it already existed",
+  "pct": 15.3,
+  "n": 83,
+  "col": "color-mix(in srgb, var(--ink) 72%, transparent)",
+  "quotes": [
+   {
+    "a": "niutech",
+    "id": 49777176,
+    "q": "The concept isn't new: zero-shot classification using e.g. Facebook BART has been available for years."
+   },
+   {
+    "a": "mary776",
+    "id": 49723196,
+    "q": "definitely seems like a modified version of GLiNER2 or 2.5: - encoder-based (no text generation) - multiple tasks in a single forward pass - deterministic outputs - constraint-based classification"
+   },
+   {
+    "a": "brainless",
+    "id": 49723278,
+    "q": "I am not an expert in this domain but as an engineer-turned-researcher, this looks a lot like GliNER with a fitting harness."
+   },
+   {
+    "a": "Wazzymandias",
+    "id": 49721109,
+    "q": "This looks and feels a lot like productionized conformal prediction"
+   },
+   {
+    "a": "techn00",
+    "id": 49722874,
+    "q": "I can't see how this is different from a fine tuned LFM2.5 encoder"
+   },
+   {
+    "a": "Oras",
+    "id": 49765997,
+    "q": "I played around with Jev last night and did it for classification tasks that I used Gemini 2.5 flash lite with. It’s a bit faster and bit cheaper, but this is compared to LLM."
+   }
+  ]
+ },
+ {
+  "k": "evidence",
+  "label": "show me the numbers",
+  "pct": 24.6,
+  "n": 133,
+  "col": "color-mix(in srgb, var(--ink) 50%, transparent)",
+  "quotes": [
+   {
+    "a": "ramon156",
+    "id": 49718120,
+    "q": "This sounds good but so far all claims just sound like marketing terms. I'd love to see real proof."
+   },
+   {
+    "a": "Mentlo",
+    "id": 49719359,
+    "q": "Hm, would be good to understand the architecture better. Is this answering just from a world model informed prior? How informed is it by the information in the prompt?"
+   },
+   {
+    "a": "elcomet",
+    "id": 49719120,
+    "q": "The technology and the results are very handwavy. What is RLCD exactly ? What are scores on benchmarks compared to LLMs ?"
+   },
+   {
+    "a": "johnsmith1840",
+    "id": 49731482,
+    "q": "So how do we evaluate how good this is? Couldn't you hook it up to a multiple choice exam? It's still LLM like, how smart is it?"
+   },
+   {
+    "a": "hbrn",
+    "id": 49770933,
+    "q": "But is there any proof that Jev is frontier intelligence? It thinks there are two Rs in strawberry. It fails to assign probabilities to die roll outcomes or coin flips."
+   },
+   {
+    "a": "pennomi",
+    "id": 49718185,
+    "q": "Indeed, they talk as skeptics but don’t offer a ton of evidence, other than a couple videos of demos. A live demo would be far more convincing."
+   }
+  ]
+ },
+ {
+  "k": "genuinely_new",
+  "label": "it's actually new",
+  "pct": 9.6,
+  "n": 52,
+  "col": "color-mix(in srgb, var(--ink) 30%, transparent)",
+  "quotes": [
+   {
+    "a": "wild_egg",
+    "id": 49767230,
+    "q": "Last time I did anything with a BERT, you had to train or fine-tune. Is that not still true? For me the cool bit is that it's all in-context learning or whatever so you can use it in any domain with zero setup."
+   },
+   {
+    "a": "soerxpso",
+    "id": 49769607,
+    "q": "The ability to knock out any arbitrary classification problem in minutes instead of in a week is a big deal."
+   },
+   {
+    "a": "verdverm",
+    "id": 49767972,
+    "q": "the difference is likely not in per domain performance, but rather that you can get similar performance across domains without needing to craft a dataset and retrain"
+   },
+   {
+    "a": "whazor",
+    "id": 49786082,
+    "q": "The Jev model is economically, but also in terms of compute, a much more efficient model. A normal LLM goes token by token, each token in a separate step."
+   },
+   {
+    "a": "saejox",
+    "id": 49784372,
+    "q": "To develop a smart ai system for my 2d roguelike platformer? game has way too many moving system for classic state-machine ai + i cant spare the time to develop it. its low latency entices me."
+   },
+   {
+    "a": "reacharavindh",
+    "id": 49784949,
+    "q": "Jev came in, and added that magic of \"you dont need to train your classifier or determine the weights\" if you dont want to, and just get the classified answer out."
+   }
+  ]
+ },
+ {
+  "k": "packaging",
+  "label": "the packaging is the point",
+  "pct": 5.2,
+  "n": 28,
+  "col": "var(--accent)",
+  "quotes": [
+   {
+    "a": "badatnames",
+    "id": 49784835,
+    "q": "It reminds me a bit of what Ansible got right: user communication. The underlying tech may have existed for a long time, but the genius is presenting it to a regular developer in a way that reads \"yes, even you can understand ML, just using a little JSON\"."
+   },
+   {
+    "a": "baq",
+    "id": 49774006,
+    "q": "The breakthrough is the product (maybe, haven’t tried it yet) just like the LLM breakthrough was ChatGPT."
+   },
+   {
+    "a": "mgfist",
+    "id": 49768631,
+    "q": "All this means is that brand and distribution matters more than ever. There's 1000 chatgpt clones but everyone still uses chatgpt."
+   },
+   {
+    "a": "rvz",
+    "id": 49769332,
+    "q": "This 100%. Engineers really lack understanding in marketing and branding. No one cares if you are \"first\"."
+   },
+   {
+    "a": "padolsey",
+    "id": 49723116,
+    "q": "I think what this shows is how important branding and comms are. They've captured imaginations with their demos and nomenclature, despite the arguably non-novel architecture."
+   },
+   {
+    "a": "bensyverson",
+    "id": 49767143,
+    "q": "And yet no one cared about this research until it was productized and communicated well. Multitouch existed before the iPhone."
+   }
+  ]
+ },
+ {
+  "k": "other",
+  "label": "everything else",
+  "pct": 45.3,
+  "n": 245,
+  "col": "color-mix(in srgb, var(--ink) 14%, transparent)",
+  "quotes": [
+   {
+    "a": "YPCrumble",
+    "id": 49726027,
+    "q": "What are peoples' thoughts on whether a local version of Jev is possible? Having to call an API for something that's main benefit is speed is orthagonal to their ethos."
+   },
+   {
+    "a": "jahala",
+    "id": 49767914,
+    "q": "Is this at all possible to run locally on a MacBook pro m5 (48gb ram)? What kind of performance could I expect? Or would you run this somewhere in the cloud?"
+   },
+   {
+    "a": "mijoharas",
+    "id": 49723267,
+    "q": "Small request, can we get an explanation of the naming of \"noul\" in the docs[0]. I tried googling, and searching the docs and didn't understand why it was called that."
+   },
+   {
+    "a": "raahelb",
+    "id": 49784439,
+    "q": "Because these decision models do not have tool calling, the knowledge cutoff might become a problem."
+   },
+   {
+    "a": "Pranav_Ghoghari",
+    "id": 49774568,
+    "q": "I am not sure for how long the output will stay absolutely free. But apart from the pricing advantage of Jev itself, I just love the simplicity of having only an input price."
+   },
+   {
+    "a": "cooljoseph",
+    "id": 49720329,
+    "q": "A few questions: 1. Do you provide any kind of largest common subtree caching for cheaper input? 2. Have you tried auto-generating Lisp programs structurally?"
+   }
+  ]
+ }
+];
+        var TOTAL = 541;
+        var bar = document.getElementById("wall-bar"),
+            leg = document.getElementById("wall-legend"),
+            note = document.getElementById("wall-note"),
+            list = document.getElementById("wall-list");
+        if (!bar) return;
+        function esc(x){ var d=document.createElement("div"); d.textContent=x; return d.innerHTML; }
+
+        var picked = null;
+
+        D.forEach(function(d){
+          var b = document.createElement("button");
+          b.type="button"; b.className="seg"; b.dataset.k=d.k;
+          b.style.flex = d.pct; b.style.background = d.col;
+          b.setAttribute("aria-pressed","false");
+          b.setAttribute("aria-label", d.label + ", " + d.pct + " percent");
+          b.textContent = d.label;
+          b.addEventListener("click", function(){ pick(picked === d.k ? null : d.k); });
+          bar.appendChild(b);
+
+          var li = document.createElement("li");
+          var lb = document.createElement("button");
+          lb.type="button"; lb.className="lg"; lb.dataset.k=d.k;
+          lb.setAttribute("aria-pressed","false");
+          lb.innerHTML = '<span class="sw" style="background:'+d.col+'"></span>' +
+                         esc(d.label) + ' <b>' + d.pct + '%</b>';
+          lb.addEventListener("click", function(){ pick(picked === d.k ? null : d.k); });
+          li.appendChild(lb);
+          leg.appendChild(li);
+
+          d.quotes.forEach(function(q, qi){
+            var el = document.createElement("div");
+            el.className="q"; el.dataset.k=d.k; el.dataset.top = qi < 1 ? "1" : "0";
+            el.innerHTML = '<span class="qa"><a href="https://news.ycombinator.com/item?id='+q.id+
+              '" target="_blank" rel="noopener" data-label="'+esc(q.a)+' on HN">'+esc(q.a)+'</a></span>' +
+              esc(q.q);
+            list.appendChild(el);
+          });
+        });
+
+        function pick(k){
+          picked = k;
+          bar.classList.toggle("picked", !!k);
+          Array.prototype.forEach.call(bar.children, function(b){
+            b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false");
+          });
+          Array.prototype.forEach.call(leg.querySelectorAll(".lg"), function(b){
+            b.setAttribute("aria-pressed", b.dataset.k === k ? "true" : "false");
+          });
+          Array.prototype.forEach.call(list.children, function(el){
+            var show = k ? (el.dataset.k === k) : (el.dataset.top === "1");
+            el.classList.toggle("hide", !show);
+          });
+          if (k){
+            var d = D.filter(function(x){ return x.k === k; })[0];
+            note.innerHTML = '<b>' + d.n + ' of ' + TOTAL + '</b> comments landed here \u2014 ' +
+              esc(d.label) + '. A few of them:';
+          } else {
+            note.innerHTML = 'Jev kept <b>' + TOTAL + '</b> of 906 comments as substantive and on topic. ' +
+              'Nearly half did not fit the four arguments I started with, which is useful in its own way. ' +
+              'The packaging argument is still the smallest band. Click one to read more.';
+          }
+        }
+        pick(null);
+      })();
+
+      /* ---------- EX-05 · ten thousand ---------- */
+      (function(){
+        var nEl = document.getElementById("tenk-n"), sEl = document.getElementById("tenk-subject"),
+            btn = document.getElementById("tenk-next");
+        if (!nEl) return;
+        var SUBJECTS = ["BERT", "curlftpfs", "the Roslyn APIs", "ReSharper", "System 1 and System 2",
+                        "a strictly proper scoring rule", "Ecclesiastes", "the curse of knowledge",
+                        "Jevons\u2019 paradox", "what a compiler actually does"];
+        var si = 0, t0 = performance.now();
+        sEl.textContent = SUBJECTS[0];
+        btn.addEventListener("click", function(){
+          si = (si + 1) % SUBJECTS.length;
+          sEl.textContent = SUBJECTS[si];
+        });
+        function draw(){
+          var secs = (performance.now() - t0) / 1000;
+          nEl.textContent = (secs * (10000 / 86400)).toFixed(1);
+        }
+        draw();
+        setInterval(draw, reduce ? 2000 : 200);
+      })();
+
+      /* ---------- code · the same job, three ways ---------- */
+      (function(){
+        var PANES = [
+ {
+  "k": "train",
+  "label": "Train a classifier",
+  "year": "2018",
+  "sub": "Bring a labelled dataset, fine-tune BERT, wait for the run, rinse and repeat when categories change.",
+  "code": [
+   "<span class=\"d\"># huggingface/transformers — text-classification README<\/span>",
+   "dataset=<span class=\"g\">\"amazon_reviews_multi\"<\/span>",
+   "subset=<span class=\"g\">\"en\"<\/span>",
+   "python run_classification.py \\",
+   "    --model_name_or_path google-bert/bert-base-uncased \\",
+   "    --dataset_name ${dataset} \\",
+   "    --dataset_config_name ${subset} \\",
+   "    --text_column_name <span class=\"g\">\"review_title,review_body,product_category\"<\/span> \\",
+   "    --label_column_name stars \\",
+   "    <span class=\"k\">--do_train<\/span> \\",
+   "    --do_eval \\",
+   "    --num_train_epochs 1 \\",
+   "    --output_dir /tmp/${dataset}_${subset}/"
+  ],
+  "src": "<a href=\"https://github.com/huggingface/transformers/blob/d53e587669ec639a422ca33f3711b48f24cdf135/examples/pytorch/text-classification/README.md#L87-L108\" target=\"_blank\" rel=\"noopener\" data-label=\"Transformers text classification README\">huggingface/transformers<\/a> &middot; <code>README.md<\/code> L87&ndash;108"
+ },
+ {
+  "k": "prompt",
+  "label": "Ask an LLM",
+  "year": "2023",
+  "sub": "LLMs simplified by skipping the training step, which was glorious, but something still has to sit between the model string and your code and make the type real.",
+  "code": [
+   "<span class=\"d\"># 567-labs/instructor — classification example<\/span>",
+   "<span class=\"k\">class<\/span> Labels(str, enum.Enum):",
+   "    SPAM = <span class=\"g\">\"spam\"<\/span>",
+   "    NOT_SPAM = <span class=\"g\">\"not_spam\"<\/span>",
+   "",
+   "<span class=\"k\">class<\/span> SinglePrediction(BaseModel):",
+   "    class_label: Labels",
+   "",
+   "<span class=\"k\">def<\/span> classify(data: str) -> SinglePrediction:",
+   "    <span class=\"k\">return<\/span> client.chat.completions.create(",
+   "        model=<span class=\"g\">\"gpt-4o-mini\"<\/span>,",
+   "        response_model=SinglePrediction,",
+   "        messages=[{",
+   "            <span class=\"g\">\"role\"<\/span>: <span class=\"g\">\"user\"<\/span>,",
+   "            <span class=\"g\">\"content\"<\/span>: f<span class=\"g\">\"Classify the following text: {data}\"<\/span>,",
+   "        }],",
+   "    )",
+   "",
+   "prediction = classify(<span class=\"g\">\"Hello there I'm a nigerian prince…\"<\/span>)",
+   "assert prediction.class_label == Labels.SPAM"
+  ],
+  "src": "<a href=\"https://github.com/567-labs/instructor/blob/e12f8b49203b0c1f253d27c1e709d0a09b9fc5a8/examples/classification/simple_prediction.py#L10-L37\" target=\"_blank\" rel=\"noopener\" data-label=\"Instructor classification example\">567-labs/instructor<\/a> &middot; <code>simple_prediction.py<\/code> L10&ndash;37"
+ },
+ {
+  "k": "s1",
+  "label": "Ask a System One model",
+  "year": "2026",
+  "sub": "Jev launches. Arbitrary input over any schema is now possible and there are stronger guarantees over the output.",
+  "code": [
+   "<span class=\"d\"># browser-use/jev-ultrafast — one request, two decisions<\/span>",
+   "<span class=\"k\">questions<\/span> = {",
+   "    <span class=\"g\">\"operation\"<\/span>: {<span class=\"g\">\"type\"<\/span>: <span class=\"g\">\"choice\"<\/span>, <span class=\"g\">\"criteria\"<\/span>: operations,",
+   "                  <span class=\"g\">\"instructions\"<\/span>: {<span class=\"g\">\"goal\"<\/span>: goal, <span class=\"g\">\"rules\"<\/span>: NEXT_ACTION}}",
+   "}",
+   "<span class=\"k\">for<\/span> operation, candidates <span class=\"k\">in<\/span> targets.items():",
+   "    questions[operation.lower() + <span class=\"g\">\"_target\"<\/span>] = {",
+   "        <span class=\"g\">\"type\"<\/span>: <span class=\"g\">\"choice\"<\/span>,",
+   "        <span class=\"g\">\"criteria\"<\/span>: {<span class=\"d\">… only the elements this operation can touch …<\/span>},",
+   "        <span class=\"g\">\"instructions\"<\/span>: {<span class=\"g\">\"goal\"<\/span>: goal, <span class=\"g\">\"operation\"<\/span>: operation,",
+   "                         <span class=\"g\">\"rules\"<\/span>: [NEXT_ACTION, TARGET]},",
+   "    }",
+   "",
+   "<span class=\"k\">body<\/span> = {",
+   "    <span class=\"g\">\"model\"<\/span>: os.environ.get(<span class=\"g\">\"TYPESAFE_MODEL\"<\/span>, <span class=\"g\">\"jev-latest\"<\/span>),",
+   "    <span class=\"g\">\"state\"<\/span>: {",
+   "        <span class=\"g\">\"page\"<\/span>: {k: state[k] <span class=\"k\">for<\/span> k <span class=\"k\">in<\/span> (<span class=\"g\">\"url\"<\/span>, <span class=\"g\">\"title\"<\/span>, <span class=\"g\">\"text\"<\/span>)},",
+   "        <span class=\"g\">\"elements\"<\/span>: elements,",
+   "        <span class=\"g\">\"recent_actions\"<\/span>: [<span class=\"d\">… last ten …<\/span>],",
+   "    },",
+   "    <span class=\"g\">\"questions\"<\/span>: questions,",
+   "}",
+   "result = post_json(<span class=\"g\">\"https://api.typesafe.ai/v1/systemone\"<\/span>,",
+   "                   os.environ[<span class=\"g\">\"TYPESAFE_API_KEY\"<\/span>], body)"
+  ],
+  "src": "<a href=\"https://github.com/browser-use/jev-ultrafast/blob/1231850a0bf1a0c0341fe408ef1668dbbfdfac46/jev_ultrafast/model.py#L81-L119\" target=\"_blank\" rel=\"noopener\" data-label=\"browser-use/jev-ultrafast\">browser-use/jev-ultrafast<\/a> &middot; <code>model.py<\/code> L81&ndash;119"
+ }
+];
+        var tabs = document.getElementById("ct-tabs"), panes = document.getElementById("ct-panes");
+        if (!tabs) return;
+        var btns = [], divs = [];
+        PANES.forEach(function(p, i){
+          var b = document.createElement("button");
+          b.type="button"; b.className="btn"; b.textContent = p.label;
+          b.setAttribute("aria-pressed","false");
+          b.addEventListener("click", function(){ sel(i); });
+          btns.push(b); tabs.appendChild(b);
+
+          var d = document.createElement("div");
+          d.className="pane";
+          d.innerHTML =
+            '<p style="margin:0 0 0.85rem;font-size:0.84rem;color:var(--ink-soft);line-height:1.55;">' +
+              '<b style="color:var(--ink);font-weight:650;">' + p.year + '.</b> ' + p.sub + '</p>' +
+            '<div class="slab" style="margin:0 0 0.5rem;"><pre>' + p.code.join("\n") + '</pre></div>' +
+            '<p class="srcline">' + p.src + '</p>';
+          divs.push(d); panes.appendChild(d);
+        });
+        function sel(i){
+          btns.forEach(function(b,j){ b.setAttribute("aria-pressed", j===i?"true":"false"); });
+          divs.forEach(function(d,j){ d.classList.toggle("on", j===i); });
+        }
+        sel(2);
+      })();
+
+      /* ---------- sources index (built from the live DOM) ---------- */
+      (function(){
+        var out = document.getElementById("src-list");
+        if (!out) return;
+        var seen = {}, n = 0;
+        var links = document.querySelectorAll('main a[href^="http"]');
+        Array.prototype.forEach.call(links, function(a){
+          var href = a.getAttribute("href");
+          if (seen[href]) return;
+          seen[href] = true;
+          n++;
+          var host = href.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+          var label = a.getAttribute("data-label") || a.textContent.trim();
+          if (!label || label === "\u2192" || label === "source" || label === "Permalink" || label.length > 62) {
+            label = href.replace(/^https?:\/\//, "");
+          }
+          var li = document.createElement("li");
+          li.innerHTML = '<span class="n">' + String(n).padStart(2, "0") + "</span>" +
+            '<span><a href="' + href + '" target="_blank" rel="noopener">' + label +
+            '</a> <span style="opacity:.65">&mdash; ' + host + "</span></span>";
+          out.appendChild(li);
+        });
+      })();
+    })();
+    </script>
+  </body>
+</html>
