@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Audioscape is joining Roblox — Filipe Herculano</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href="https://filipeherculano.com/audioscape-is-joining-roblox/" />
+    <meta name="description" content="Over the past 4 years, I&rsquo;ve been obsessed with one question: how do you make a million audio assets actually useful to a creator?" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Audioscape is joining Roblox" />
+    <meta property="og:description" content="Over the past 4 years, I&rsquo;ve been obsessed with one question: how do you make a million audio assets actually useful to a creator?" />
+    <meta property="og:url" content="https://filipeherculano.com/audioscape-is-joining-roblox/" />
+    <meta name="twitter:card" content="summary" />
+    <style>
+      /* Same porcelain world as the previous posts, stripped to the prose:
+         no slabs, no notes. The announcement stands on its own. */
+      @font-face {
+        font-family: "Recursive";
+        src: url("../assets/fonts/recursive-latin.woff2") format("woff2");
+        font-weight: 300 1000;
+        font-display: swap;
+      }
+
+      :root {
+        --porcelain: #f3f4f1;
+        --ink: #23282b;
+        --ink-soft: #5c6468;
+        --prompt: #e2a93b;
+        --signal: #c2185b;
+      }
+      /* system preference wins unless the reader has explicitly picked light */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --porcelain: #101214;
+          --ink: #d8dad5;
+          --ink-soft: #8b9195;
+          --signal: #d27e99;
+        }
+      }
+      /* explicit override from the site-wide toggle */
+      :root[data-theme="dark"] {
+        --porcelain: #101214;
+        --ink: #d8dad5;
+        --ink-soft: #8b9195;
+        --signal: #d27e99;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--porcelain); }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Recursive", system-ui, sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.4;
+        font-weight: 380;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      .topbar a,
+      .date {
+        font-family: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+
+      .topbar {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.25rem 1.25rem 0;
+      }
+      .topbar a {
+        color: var(--ink-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
+      .topbar a:hover,
+      .topbar a:focus-visible { color: var(--ink); }
+
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 4rem;
+      }
+
+      .date {
+        color: var(--ink-soft);
+        font-size: 0.85rem;
+        margin: 0 0 1.25rem;
+      }
+      .date::before { content: "# "; color: var(--prompt); }
+
+      h1 {
+        font-variation-settings: "MONO" 0, "CASL" 1;
+        font-weight: 800;
+        font-size: clamp(1.9rem, 5.5vw, 2.75rem);
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        margin: 0 0 1.75rem;
+      }
+
+      p { margin: 0 0 1.1rem; }
+      a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--signal) 55%, transparent); text-decoration-thickness: 1.5px; }
+      a:hover { text-decoration-color: var(--signal); }
+      a:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+      .caret {
+        display: inline-block; width: 0.55em; height: 1.1em;
+        margin-left: 0.15em; vertical-align: text-bottom;
+        background: var(--prompt); animation: blink 1.1s steps(1) infinite;
+      }
+      .caret.quiet { background: var(--ink-soft); }
+      @keyframes blink { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 0.7; } }
+
+      footer {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 0 1.25rem 4rem;
+      }
+      footer a { color: var(--ink-soft); font-size: 0.9rem; }
+
+      /* ---- theme toggle (same affordance as the home page) ---- */
+      .theme-toggle {
+        position: fixed; right: 18px; bottom: 18px; z-index: 9000;
+        width: 42px; height: 42px; border-radius: 50%;
+        display: grid; place-items: center; cursor: pointer;
+        background: var(--porcelain); color: var(--ink);
+        border: 1.5px solid color-mix(in srgb, var(--ink) 32%, transparent);
+        box-shadow: 0 4px 16px rgba(0,0,0,.14);
+        transition: transform .2s ease, background .3s ease, color .3s ease, border-color .3s ease;
+      }
+      .theme-toggle:hover { transform: translateY(-2px); }
+      .theme-toggle:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+      .theme-toggle svg { width: 18px; height: 18px; }
+      .theme-toggle .ic-sun { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-moon { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-sun { display: block; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: none; }
+        :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: block; }
+      }
+      @media (prefers-reduced-motion: reduce) { .theme-toggle { transition: none; } }
+    </style>
+  </head>
+  <body>
+    <header class="topbar"><a href="/">&larr; filipe herculano</a></header>
+
+    <main>
+      <p class="date">2026-10-09 &middot; friday &middot; <a href="https://lnkd.in/p/gQBykfd7" target="_blank" rel="noopener">on linkedin</a></p>
+      <h1>Audioscape is joining Roblox</h1>
+
+      <p>Thrilled to announce that <a href="https://audioscape.ai/" target="_blank" rel="noopener">Audioscape</a> is joining <a href="https://www.roblox.com/" target="_blank" rel="noopener">Roblox</a>!</p>
+
+      <p>Over the past 4 years, I&rsquo;ve been obsessed with one question: how do you make a million audio assets actually useful to a creator?</p>
+
+      <p>The answer Sean and I built at Audioscape involved richer and structured metadata from sound designers, first class music intelligence, vector embeddings, agentic pipelines, and a robust and fast optimized search that already runs at production scale inside Roblox. I am very excited to bring that work inside and push it further.</p>
+
+      <p>At Roblox, I&rsquo;ll be focused on accelerating agentic search and content processing across all asset types. It&rsquo;s a big, hard problem, and it&rsquo;s exactly the kind of work I want to be doing.</p>
+
+      <p>Grateful to everyone who supported the Audioscape journey. Excited for what comes next.<span class="caret quiet" aria-hidden="true"></span></p>
+    </main>
+
+    <footer>
+      <p><a href="/">&larr; back home</a></p>
+    </footer>
+
+    <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+
+    <script>
+    (function(){
+      "use strict";
+      /* theme toggle (shares the site-wide localStorage key) */
+      var root = document.documentElement, btn = document.querySelector(".theme-toggle");
+      function isDark(){
+        var a = root.getAttribute("data-theme");
+        if (a) return a === "dark";
+        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+      function set(dark){
+        root.setAttribute("data-theme", dark ? "dark" : "light");
+        btn.setAttribute("aria-pressed", dark ? "true" : "false");
+        try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch(e){}
+      }
+      btn.setAttribute("aria-pressed", isDark() ? "true" : "false");
+      btn.addEventListener("click", function(){ set(!isDark()); });
+    })();
+    </script>
+  </body>
+</html>
