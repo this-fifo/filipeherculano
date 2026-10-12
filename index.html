@@ -280,6 +280,8 @@
   .about .bio{ max-width:58ch; font-size:clamp(15px,1.8vw,19px);
     font-variation-settings:"wght" 420,"CASL" .35,"slnt" 0; line-height:1.5;
     color:color-mix(in srgb,var(--ink) 86%,transparent); }
+  .about .bio a{ border-bottom:2px solid var(--signal); transition:color .2s ease; }
+  .about .bio a:hover,.about .bio a:focus-visible{ color:var(--signal); }
   @media (max-width:780px){ .about-row{ grid-template-columns:1fr; gap:8px; } }
 
   /* WRITING — plain list, newest first */
@@ -344,6 +346,7 @@
     .contact-grid{ grid-template-columns:1fr; }
     .fact{ grid-template-columns:1fr; gap:8px; }
     .topline .loc{ text-align:left; }
+    footer{ flex-direction:column; }
     /* hero reflow: portrait drops below the name (in-flow) so the name keeps a clean field */
     .hero{ min-height:auto; justify-content:flex-start; gap:clamp(18px,4vh,34px); padding-bottom:clamp(30px,6vh,56px); }
     .topline{ order:0; }
@@ -395,7 +398,7 @@
 
       <p class="availability">
         Engineering leadership and AI strategist,
-        <span class="open">open</span> to advisory work.
+        <span class="open">open</span> to select advisory work.
       </p>
 
       <div class="portrait" id="portrait" aria-hidden="true"></div>
@@ -417,6 +420,10 @@
         <h2 class="title" id="cur">About</h2>
       </div>
       <div class="about">
+        <div class="about-row">
+          <span class="k label">Now</span>
+          <p class="bio"><a href="/audioscape-is-joining-roblox/">Principal Software Engineer at Roblox</a>.</p>
+        </div>
         <div class="about-row">
           <span class="k label">Bio</span>
           <p class="bio">I'm an artist at heart turned software engineer who bridges technical expertise with creative vision. My journey from startup environments to corporate leadership roles has taught me that impactful technology lives at the intersection of code and human connection.</p>
@@ -463,6 +470,7 @@
 
     <footer>
       <span class="label">Filipe Herculano — Fifo</span>
+      <span class="label">Views are my own</span>
       <span class="label"><span class="seal" title="志 — kokorozashi (aspiration)">志</span> · 2026</span>
     </footer>
 
