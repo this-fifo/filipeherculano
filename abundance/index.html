@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+    <script>document.documentElement.classList.add("js");</script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Abundance — Filipe Herculano</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href="https://filipeherculano.com/abundance/" />
+    <meta name="description" content="I find my conversations with AI almost always are an evolution of intent." />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Abundance" />
+    <meta property="og:description" content="I find my conversations with AI almost always are an evolution of intent." />
+    <meta property="og:url" content="https://filipeherculano.com/abundance/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preload" href="/assets/fonts/recursive-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      /* The live version of the post. It opens like a talk: an agent chat sends
+         one request, the agent's searches flood in, and the results crumble into
+         the space of launches. The stage then docks beside the essay and follows
+         the reader's scroll. At the end it shows everything at once, then a handful.
+         One stage, one clock (the scroll), one amber dot: you. */
+      @font-face {
+        font-family: "Recursive";
+        src: url("/assets/fonts/recursive-latin.woff2") format("woff2");
+        font-weight: 300 1000;
+        font-display: swap;
+      }
+
+      :root {
+        --porcelain: #f3f4f1;
+        --ink: #23282b;
+        --ink-soft: #5c6468;
+        --rule: #d9dbd5;
+        --slab: #16181a;
+        --slab-ink: #e8e4da;
+        --slab-dim: #9a938a;
+        --prompt: #e2a93b;   /* amber: you */
+        --ok: #6f9e5c;       /* green: what you needed */
+        --signal: #c2185b;   /* pink: what gets shown to you; links */
+        --card: #ffffff;
+        --card-rule: #cbd0c9;
+        --grid: #e7e9e5;
+        --bar-rest: #8f9590;
+        --bar-feat: #c2185b;
+        --you-mark: #e2a93b;
+        --lift: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.07);
+      }
+      /* system preference wins unless the reader has explicitly picked light */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --porcelain: #101214;
+          --ink: #d8dad5;
+          --ink-soft: #8b9195;
+          --rule: #24282b;
+          --slab: #191c1f;
+          --slab-ink: #e8e4da;
+          --slab-dim: #8d867d;
+          --prompt: #e2a93b;
+          --ok: #86b573;
+          --signal: #d27e99;
+          --card: #171b1e;
+          --card-rule: #333a3f;
+          --grid: #262b2f;
+          --bar-rest: #626a6e;
+          --bar-feat: #d27e99;
+          --you-mark: #c98f2c;
+          --lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+        }
+      }
+      /* explicit override from the site-wide toggle */
+      :root[data-theme="dark"] {
+        --porcelain: #101214;
+        --ink: #d8dad5;
+        --ink-soft: #8b9195;
+        --rule: #24282b;
+        --slab: #191c1f;
+        --slab-ink: #e8e4da;
+        --slab-dim: #8d867d;
+        --prompt: #e2a93b;
+        --ok: #86b573;
+        --signal: #d27e99;
+        --card: #171b1e;
+        --card-rule: #333a3f;
+        --grid: #262b2f;
+        --bar-rest: #626a6e;
+        --bar-feat: #d27e99;
+        --you-mark: #c98f2c;
+        --lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--porcelain); }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Recursive", system-ui, sans-serif;
+        font-variation-settings: "MONO" 0, "CASL" 0.4;
+        font-weight: 380;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      .topbar a,
+      .date,
+      .slab,
+      .hud,
+      .key,
+      .lbl.mono,
+      .ex-label,
+      .ex-foot,
+      .chart,
+      .tip,
+      .tableview,
+      .sn-ref,
+      .sn .tag,
+      .src li,
+      .q,
+      .status,
+      .chat-sub,
+      .cue {
+        font-family: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
+
+      /* ---- layout: one stage pinned behind the story; the text docks beside it ---- */
+      .theater { position: relative; }
+      .stage { display: none; }
+      .js .stage {
+        display: block;
+        position: sticky; top: 0; z-index: 2;
+        height: 100vh; height: 100svh;
+        overflow: hidden;
+        background: var(--porcelain);
+      }
+      /* the visible frame: the script clips the stage to it and moves it between full window and docked */
+      .frame { position: absolute; inset: 0; pointer-events: none; --rx: 0px; --ry: 0px; --rw: 100vw; --rh: 100vh; }
+      .flow { position: relative; }
+      .js .flow { margin-top: -100vh; margin-top: -100svh; }
+
+      .open { position: relative; }
+      .js .open { height: 180vh; height: 180svh; }
+      .topbar { position: relative; z-index: 3; max-width: 40rem; margin: 0 auto; padding: 1.25rem 1.25rem 0; }
+      .js .topbar { max-width: none; margin: 0; padding: 1.2rem clamp(1.25rem, 4vw, 4.5rem) 0; }
+      .topbar a { color: var(--ink-soft); text-decoration: none; font-size: 0.85rem; }
+      .topbar a:hover,
+      .topbar a:focus-visible { color: var(--ink); }
+      .title {
+        max-width: 40rem; margin: 2.5rem auto 0; padding: 0 1.25rem;
+        font-variation-settings: "MONO" 0, "CASL" 1;
+        font-weight: 800;
+        font-size: clamp(2.1rem, 6vw, 3.2rem);
+        line-height: 1.1;
+        letter-spacing: -0.015em;
+      }
+      .js .title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+      .beat { position: absolute; left: 0; top: 95vh; top: 95svh; width: 1px; height: 1px; }
+      .close { display: none; }
+      .js .close { position: relative; display: block; height: 290vh; height: 290svh; }
+      .beat-end { top: 160vh; top: 160svh; }
+
+      .text { position: relative; z-index: 1; min-width: 0; max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.25rem 0; }
+      .after { max-width: 40rem; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+      .after footer a { color: var(--ink-soft); font-size: 0.9rem; }
+
+      @media (min-width: 64rem) {
+        .js:not(.no-webgl) .text { max-width: none; width: min(39rem, 50vw); margin: 0 0 0 clamp(1.5rem, 4vw, 4.5rem); padding: 2.5rem 0 0; }
+      }
+
+      .date { color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 1.25rem; }
+      .date::before { content: "# "; color: var(--prompt); }
+
+      h2 {
+        font-variation-settings: "MONO" 0, "CASL" 0.8;
+        font-weight: 650;
+        font-size: 1.3rem;
+        margin: 2.75rem 0 0.75rem;
+      }
+
+      p { margin: 0 0 1.1rem; }
+      a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--signal) 55%, transparent); text-decoration-thickness: 1.5px; }
+      a:hover { text-decoration-color: var(--signal); }
+      :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+      .step-last { padding-bottom: 24vh; }   /* room before the close; sections otherwise flow like paragraphs */
+
+      .caret {
+        display: inline-block; width: 0.55em; height: 1.1em;
+        margin-left: 0.15em; vertical-align: text-bottom;
+        background: var(--ink-soft); animation: blink 1.1s steps(1) infinite;
+      }
+      @keyframes blink { 50% { opacity: 0; } }
+
+      hr { border: 0; border-top: 1px solid var(--rule); margin: 2.75rem auto; width: 5rem; }
+
+      /* ---- prompts from the side project, as one terminal slab ---- */
+      .slab {
+        background: var(--slab);
+        color: var(--slab-ink);
+        border-radius: 5px;
+        padding: 1rem 1.2rem 1.05rem;
+        margin: 1.5rem -0.25rem 1.7rem;
+        font-size: 0.86rem;
+        line-height: 1.68;
+      }
+      :root[data-theme="dark"] .slab { border: 1px solid var(--rule); }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .slab { border: 1px solid var(--rule); }
+      }
+      .slab .cap {
+        display: block;
+        color: var(--slab-dim);
+        font-size: 0.72rem;
+        margin-bottom: 0.7rem;
+        letter-spacing: 0.04em;
+      }
+      .log ol { list-style: none; margin: 0; padding: 0; }
+      .log li { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); align-items: baseline; }
+      .log li + li { margin-top: 0.8rem; }
+      .log time { color: var(--slab-dim); font-size: 0.72rem; transition: color 0.3s ease; }
+      .log li.is-current time { color: var(--prompt); }
+      .slab p { margin: 0; }
+      .slab .in::before { content: "\276F  "; color: var(--prompt); font-weight: 700; }
+      .slab a { color: inherit; text-decoration-color: color-mix(in srgb, var(--prompt) 70%, transparent); }
+
+      .disclaimer { font-size: 0.82rem; line-height: 1.55; color: var(--ink-soft); margin: -0.4rem 0 1.6rem; }
+
+      /* ---- notes: CSS-only, revealed inline on tap (the stage owns the margin) ---- */
+      .sn-ref {
+        display: inline-block;
+        color: var(--signal);
+        font-size: 0.7rem;
+        font-weight: 700;
+        vertical-align: super;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.15em;
+        border-radius: 2px;
+      }
+      .sn-ref:hover { background: color-mix(in srgb, var(--signal) 14%, transparent); }
+      .sn-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; }
+      .sn { display: none; font-size: 0.8rem; line-height: 1.55; color: var(--ink-soft); }
+      .sn b { color: var(--ink); font-weight: 650; }
+      .sn .tag { display: block; font-size: 0.62rem; letter-spacing: 0.12em; color: var(--signal); margin-bottom: 0.35rem; }
+      .sn-toggle:checked + .sn {
+        display: block;
+        margin: 0.7rem 0 1.1rem;
+        padding: 0.7rem 0.9rem;
+        border-left: 2px solid var(--signal);
+        background: var(--card);
+      }
+
+      /* ---- figure 1 ---- */
+      .ex {
+        margin: 2rem -0.25rem 2.2rem;
+        border: 1px solid var(--card-rule);
+        border-radius: 5px;
+        background: var(--card);
+      }
+      .ex-head {
+        display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap;
+        padding: 0.8rem 1.1rem;
+        border-bottom: 1px solid var(--card-rule);
+      }
+      .ex-label { font-size: 0.7rem; color: var(--ink-soft); }
+      .ex-label::after { content: " /"; opacity: 0.45; }
+      .ex-title { font-size: 0.9rem; font-weight: 600; }
+      .ex-body { position: relative; padding: 1rem 1.1rem 0.8rem; }
+      .ex-foot {
+        padding: 0.7rem 1.1rem 0.9rem;
+        border-top: 1px solid var(--card-rule);
+        font-size: 0.72rem; line-height: 1.55; color: var(--ink-soft);
+      }
+      .ex-foot a { color: var(--ink); }
+      .chart { min-height: 236px; }
+      .chart svg { display: block; overflow: visible; }
+      .chart .grid { stroke: var(--grid); stroke-width: 1; }
+      .chart .axis { stroke: var(--card-rule); stroke-width: 1; }
+      .chart .tick { fill: var(--ink-soft); font-size: 11px; font-variant-numeric: tabular-nums; }
+      .chart .val { fill: var(--ink); font-size: 11px; font-weight: 600; }
+      .chart .seg-feat { fill: var(--bar-feat); }
+      .chart .seg-rest { fill: var(--bar-rest); }
+      .chart .bar { transition: opacity 0.15s ease; }
+      .chart.hovering .bar:not(.on) { opacity: 0.45; }
+      .chart .hit { fill: transparent; }
+      .chart .hit:focus { outline: none; }
+      .chart .hit:focus-visible { stroke: var(--signal); stroke-width: 1.5; }
+      .legend {
+        display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem;
+        list-style: none; margin: 0.5rem 0 0; padding: 0;
+        font-size: 0.76rem; color: var(--ink-soft);
+      }
+      .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.45rem; vertical-align: -1px; }
+      .tip {
+        position: absolute; z-index: 2; left: 0; top: 0;
+        pointer-events: none;
+        min-width: 11rem;
+        background: var(--card);
+        border: 1px solid var(--card-rule);
+        border-radius: 6px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        padding: 0.5rem 0.65rem;
+        font-size: 0.74rem; line-height: 1.5; color: var(--ink-soft);
+        opacity: 0;
+        transition: opacity 0.12s ease;
+      }
+      .tip.on { opacity: 1; }
+      .tip strong { display: block; color: var(--ink); font-size: 0.9rem; font-weight: 650; }
+      .tip .row::before {
+        content: ""; display: inline-block; width: 12px; height: 2px;
+        margin-right: 0.45rem; vertical-align: 3px; background: var(--c);
+      }
+      .tableview { margin-top: 0.7rem; font-size: 0.74rem; color: var(--ink-soft); }
+      .tableview summary { cursor: pointer; }
+      .tableview table { border-collapse: collapse; margin-top: 0.5rem; font-variant-numeric: tabular-nums; }
+      .tableview th, .tableview td { text-align: right; padding: 0.2rem 0 0.2rem 1.2rem; border-bottom: 1px solid var(--rule); }
+      .tableview th:first-child, .tableview td:first-child { text-align: left; padding-left: 0; }
+      .tableview th { font-weight: 600; color: var(--ink); }
+
+      /* ---- figure 2: one dot per stop; read, clustered, then sorted by cause ---- */
+      .pipe, .u-lbl {
+        font-family: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+        font-variation-settings: "MONO" 1, "CASL" 0;
+      }
+      .pipe {
+        display: flex; flex-wrap: wrap; gap: 0.2rem 0;
+        list-style: none; margin: 0 0 0.75rem; padding: 0;
+        font-size: 0.74rem; color: var(--ink-soft);
+      }
+      .pipe li { opacity: 0.5; transition: opacity 0.25s ease, color 0.25s ease; }
+      .pipe li + li::before { content: "\2192"; margin: 0 0.55rem; }
+      .pipe li.on { opacity: 1; color: var(--ink); }
+      .pipe b { font-weight: 650; }
+      .units { position: relative; min-height: 18rem; }
+      .units canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+      .u-lbl {
+        position: absolute; left: 0; top: 0;
+        white-space: nowrap; pointer-events: none;
+        font-size: 0.74rem; color: var(--ink);
+        opacity: 0;
+      }
+      .u-lbl em { font-style: normal; color: var(--ink-soft); margin-left: 0.6rem; }
+      .u-band { font-weight: 600; }
+      .u-band em { font-weight: 380; }
+      .tableview tr.cause th { text-align: left; padding-left: 0; font-weight: 600; color: var(--ink); }
+      .tableview tr.sub td:first-child { padding-left: 1rem; }
+      @media (max-width: 40rem) {
+        .pipe, .u-lbl { font-size: 0.68rem; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pipe li { transition: none; }
+      }
+
+      /* ---- the stage ---- */
+      .scene, .scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .labels { position: absolute; inset: 0; pointer-events: none; }
+      .lbl {
+        position: absolute; left: 0; top: 0;
+        white-space: nowrap;
+        font-size: 0.8rem; line-height: 1.3;
+        color: var(--ink);
+        background: color-mix(in srgb, var(--porcelain) 84%, transparent);
+        padding: 0.05rem 0.4rem;
+        border-radius: 4px;
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+      .lbl.human { font-variation-settings: "MONO" 0, "CASL" 1; font-weight: 520; }
+      .lbl.mono { font-size: 0.76rem; color: var(--ink-soft); }
+      .hud {
+        position: absolute; left: calc(var(--rx) + 1rem); top: calc(var(--ry) + 0.9rem); margin: 0;
+        font-size: 0.78rem; color: var(--ink-soft);
+        background: color-mix(in srgb, var(--porcelain) 84%, transparent);
+        padding: 0.1rem 0.4rem; border-radius: 4px;
+      }
+      .hud:empty { display: none; }
+      .key {
+        position: absolute; left: calc(var(--rx) + 1rem); bottom: calc(100% - var(--ry) - var(--rh) + 0.9rem);
+        width: calc(var(--rw) - 5.5rem);
+        list-style: none; margin: 0; padding: 0;
+        display: flex; flex-wrap: wrap; gap: 0.2rem 1rem;
+        font-size: 0.74rem; color: var(--ink-soft);
+        opacity: var(--key, 0);
+      }
+      .key i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
+      .key .k-dot { background: var(--ink); opacity: 0.5; }
+      .key .k-shown { background: var(--signal); }
+      .key .k-you { background: var(--prompt); }
+      .key .k-need { background: var(--ok); }
+      .edge {
+        position: absolute; left: var(--rx); width: var(--rw); top: calc(var(--ry) + var(--rh) - 1px); height: 1px;
+        background: var(--rule); opacity: var(--edge, 0);
+      }
+      .no-webgl .scene, .no-webgl .labels, .no-webgl .hud, .no-webgl .key, .no-webgl .edge { display: none; }
+      @media (max-width: 63.99rem) {
+        .key { left: calc(var(--rx) + 0.7rem); bottom: calc(100% - var(--ry) - var(--rh) + 0.5rem); width: calc(var(--rw) - 4.4rem); font-size: 0.68rem; gap: 0.1rem 0.8rem; }
+        .hud { left: calc(var(--rx) + 0.7rem); top: calc(var(--ry) + 0.6rem); font-size: 0.72rem; }
+        .lbl { font-size: 0.72rem; }
+        .lbl.mono { font-size: 0.7rem; }
+      }
+
+      /* ---- the opening: a plain agent chat that the story falls out of ---- */
+      .intro { position: absolute; inset: 0; pointer-events: none; }
+      .chat {
+        position: absolute; top: 0; bottom: 0; left: 50%;
+        width: min(38rem, calc(100% - 2.5rem));
+        transform: translateX(-50%);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 1.5rem; padding-bottom: 7vh;
+      }
+      .chat.is-live { justify-content: flex-start; align-items: stretch; gap: 0.75rem; padding: max(4.2rem, 9vh) 0 max(4.2rem, 8vh); }
+      .brand {
+        margin: 0;
+        font-variation-settings: "MONO" 0, "CASL" 1;
+        font-weight: 800;
+        font-size: clamp(2.7rem, 9vw, 4.8rem);
+        line-height: 1;
+        letter-spacing: -0.025em;
+        transform-origin: 0 0;
+      }
+      .chat.is-live .brand { font-size: 1.6rem; letter-spacing: -0.015em; align-self: flex-start; }
+      .chat-sub { display: none; margin: -0.35rem 0 0; font-size: 0.72rem; color: var(--ink-soft); }
+      .chat.is-live .chat-sub { display: block; animation: rise 0.45s ease-out 0.62s both; }
+      @keyframes rise { from { opacity: 0; transform: translateY(4px); } }
+      .convo {
+        display: none; flex: 1; min-height: 0; overflow: hidden;
+        -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%);
+        mask-image: linear-gradient(to bottom, transparent, #000 16%);
+      }
+      .chat.is-live .convo { display: flex; flex-direction: column; }
+      .convo > :first-child { margin-top: auto; }   /* the newest message sits at the bottom, as in any chat */
+      .you-msg {
+        align-self: flex-end; max-width: 82%; margin: 0 0 0.9rem;
+        padding: 0.6rem 0.95rem;
+        background: color-mix(in srgb, var(--prompt) 15%, var(--card));
+        border: 1px solid color-mix(in srgb, var(--prompt) 40%, var(--card-rule));
+        border-radius: 16px 16px 4px 16px;
+        font-variation-settings: "MONO" 0, "CASL" 1; font-weight: 450; font-size: 1rem; line-height: 1.45;
+      }
+      .q { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0 0.25rem; font-size: 0.74rem; line-height: 1.4; color: var(--ink-soft); white-space: nowrap; }
+      .q svg { flex: none; width: 12px; height: 12px; }
+      .q span { overflow: hidden; text-overflow: ellipsis; }
+      .r { display: grid; gap: 4px; padding: 0.15rem 0 0.15rem 1.25rem; }
+      .r b { display: block; height: 6px; border-radius: 3px; background: var(--rule); }
+      .r b.t { height: 8px; background: color-mix(in srgb, var(--signal) 70%, transparent); }
+      .status { display: none; align-items: center; gap: 0.45rem; margin: 0; padding-left: 0.3rem; font-size: 0.74rem; color: var(--ink-soft); }
+      .chat.is-live .status { display: flex; }
+      /* hidden until the first search; when on, it inherits, so it hides with the opening */
+      .chat.is-live .status:not(.on) { visibility: hidden; }
+      .status b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+      .spin { flex: none; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink-soft); border-top-color: transparent; animation: spin 0.8s linear infinite; }
+      .status.done .spin { animation: none; border-color: var(--ok); background: var(--ok); }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .ask {
+        position: relative; flex: none;
+        display: flex; align-items: center; gap: 0.75rem;
+        width: 100%; height: 3.25rem; padding: 0 0.5rem 0 1.3rem;
+        border-radius: 999px;
+        background: var(--card);
+        border: 1px solid var(--card-rule);
+        box-shadow: var(--lift);
+        transform-origin: 0 0;
+      }
+      .ask-line {
+        flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
+        font-size: 1.05rem; line-height: 3.25rem;
+        font-variation-settings: "MONO" 0, "CASL" 1; font-weight: 450;
+      }
+      .ask-caret {
+        display: inline-block; width: 1.5px; height: 1.2em; margin-left: 1px;
+        vertical-align: -0.22em; background: var(--ink);
+        animation: blink 1.05s steps(1) infinite;
+      }
+      .ask.typing .ask-caret { animation: none; }
+      .ask.press { animation: press 0.22s ease; }
+      @keyframes press { 40% { transform: scale(0.985); } }
+      .send {
+        flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%;
+        display: grid; place-items: center;
+        background: var(--ink); color: var(--porcelain);
+        opacity: 0.16; transition: opacity 0.2s ease;
+      }
+      .ask.has-text .send { opacity: 1; }
+      .send svg { width: 15px; height: 15px; }
+      .dust { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+      .cue {
+        position: absolute; left: 50%; bottom: 1.6rem; margin: 0;
+        transform: translateX(-50%);
+        font-size: 0.72rem; color: var(--ink-soft);
+        opacity: 0; transition: opacity 0.6s ease;
+      }
+      .cue.on { opacity: 1; }
+      .cue span { display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+      @keyframes bob { 50% { transform: translateY(3px); } }
+      .fliers { position: absolute; inset: 0; pointer-events: none; }
+      .fly { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
+      .fly-box { border: 1px solid var(--card-rule); background: var(--card); border-radius: 999px; }
+      .fly-box::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; background: var(--prompt); opacity: var(--p, 0); }
+      @media (max-width: 40rem) {
+        .ask-line { font-size: 1rem; }
+        .you-msg { font-size: 0.95rem; }
+      }
+
+      /* ---- sources ---- */
+      .src { margin: 0; padding: 0; list-style: none; font-size: 0.78rem; line-height: 1.55; color: var(--ink-soft); }
+      .src li { display: flex; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--rule); }
+      .src li:last-child { border-bottom: 0; }
+      .src .n { flex: 0 0 1.4rem; }
+      .src a { color: var(--ink); }
+
+      /* ---- theme toggle (same affordance as the home page) ---- */
+      .theme-toggle {
+        position: fixed; right: 18px; bottom: 18px; z-index: 9000;
+        width: 42px; height: 42px; border-radius: 50%;
+        display: grid; place-items: center; cursor: pointer;
+        background: var(--porcelain); color: var(--ink);
+        border: 1.5px solid color-mix(in srgb, var(--ink) 32%, transparent);
+        box-shadow: 0 4px 16px rgba(0,0,0,.14);
+        transition: transform .2s ease, background .3s ease, color .3s ease, border-color .3s ease;
+      }
+      .theme-toggle:hover { transform: translateY(-2px); }
+      .theme-toggle:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+      .theme-toggle svg { width: 18px; height: 18px; }
+      .theme-toggle .ic-sun { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-moon { display: none; }
+      :root[data-theme="dark"] .theme-toggle .ic-sun { display: block; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: none; }
+        :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: block; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .log time, .chart .bar, .tip, .theme-toggle, .send, .cue { transition: none; }
+        .caret, .ask-caret, .cue span, .spin, .chat.is-live .chat-sub { animation: none; }
+        .caret { opacity: 0.7; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="theater">
+        <div class="stage" id="stage">
+          <div class="scene" role="img" aria-label="Illustration that follows the essay. Each dot stands for a batch of Product Hunt launches: the yearly counts are real and the positions are illustrative. As you read, the dots multiply year by year, a search from where you are lights up the dots around you, and the view moves from where the data is to where you are.">
+            <canvas id="scene" aria-hidden="true"></canvas>
+          </div>
+          <div class="labels" id="labels" aria-hidden="true"></div>
+          <div class="frame" id="frame">
+          <p class="hud" id="hud" aria-hidden="true"></p>
+          <ul class="key" aria-hidden="true">
+            <li><i class="k-dot"></i>Product Hunt launches, 1 dot = <span id="perdot">10</span>, placed for illustration</li>
+            <li><i class="k-shown"></i>shown to you</li>
+            <li><i class="k-you"></i>you</li>
+            <li><i class="k-need"></i>what you needed</li>
+          </ul>
+          <div class="edge" aria-hidden="true"></div>
+          </div>
+
+          <!-- the opening: your Oct 22 request, paraphrased, and the searches the agents ran right after it, word for word -->
+          <div class="intro" id="intro" aria-hidden="true">
+            <div class="chat" id="chat">
+              <p class="brand">Abundance</p>
+              <p class="chat-sub">a real session from my side project, oct 22 &middot; prompt paraphrased &middot; 56 of its 74 searches shown</p>
+              <div class="convo" id="convo"></div>
+              <p class="status" id="status"><i class="spin"></i><span class="v">Searching the web</span><span>&middot;</span><b id="count">0</b><span class="n">searches</span></p>
+              <div class="ask">
+                <span class="ask-line"><span class="ask-txt"></span><span class="ask-caret"></span></span>
+                <span class="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+              </div>
+            </div>
+            <canvas class="dust" id="dust"></canvas>
+            <p class="cue">scroll <span>&darr;</span></p>
+            <div class="fliers" id="fliers"></div>
+          </div>
+        </div>
+
+        <div class="flow">
+          <section class="open" id="open">
+            <header class="topbar"><a href="/">&larr; filipe herculano</a></header>
+            <h1 class="title">Abundance</h1>
+            <i class="beat" data-t="-0.45" aria-hidden="true"></i>
+          </section>
+
+          <div class="text" data-t="0" data-line="0.88">
+            <p class="date">2026-11-27 &middot; friday</p>
+            <p class="disclaimer">Disclaimer: I wrote this with Claude Code running Claude Opus 5.5, which built the interactive page, the figures and the notes, and drafted some of the connecting passages from my notes and session logs, which I then edited.</p>
+
+            <section class="step" data-step="0">
+              <p>I find my conversations with AI almost always are an evolution of intent. I start with thinking I know about where I want to go, only to find it evolves the more context gets added.</p>
+
+              <p>For a long time I treated that as the agents getting things wrong. When I finally went back through my own sessions, I found that more than half of the times I had stopped an agent were about what I wanted, and most of those were me changing my mind after seeing its work. Now that almost anything I can think of already exists in some form, I think search and the agents we build with should help me find out what I need sooner, instead of searching harder for what I first asked.</p>
+
+              <p>The clearest case was a side project I worked on over the last few months. It started off as a custom harness with a formal proof system, then a platform for orchestration of agents, and then I realized I didn&rsquo;t know what I didn&rsquo;t know and pivoted entirely. By a formal proof system I mean that the harness only accepted an agent&rsquo;s change once the change cited its evidence and passed the checks I had declared up front.</p>
+
+              <p>A few of my prompts from those sessions:</p>
+
+              <div class="slab log" role="figure" aria-label="Three prompts from the side project, October 4 to 28">
+                <span class="cap">side project &middot; prompts</span>
+                <ol>
+                  <li data-t="0.1667"><time datetime="2026-10-04">oct 4</time><p class="in">The harness is not able to educate me when it should which leads to wasted cycles. I am not to be assumed as the all knowing intellect but rather the most invested party in the outcome.</p></li>
+                  <li data-t="0.6667"><time datetime="2026-10-21">oct 21</time><p class="in">No need to keep the tracked research corpus, it's noise by now.</p></li>
+                  <li data-t="1"><time datetime="2026-10-28">oct 28</time><p class="in">&hellip;that again is me doing the same dance within this session. That principle is what I often call the <a href="/assume-i-dont-know-what-i-dont-know/">"I don't know what I don't know"</a> and the idea that the harness should be able to sniff/understand that out of me and be able to course correct and steer before it has already wasted many turns or produced a lot of experiment and sometimes noise.</p></li>
+                </ol>
+              </div>
+            </section>
+
+            <section class="step" data-step="1">
+              <p data-t="1.3">Some of that drift came from what I learned while building, and some from what kept launching around me. Between early October and early November I brought the agent a new tool, launch or post to study almost every week, and on October 22 I asked it whether what I was building already existed in some form. Its agents ran 74 web searches in four minutes and came back saying that no single product did all of it, but that every piece of it existed somewhere. A week later it pointed out that this was the fourth time a layer I had planned to build had turned out to be someone else&rsquo;s free infrastructure. That flood of new tools didn&rsquo;t start with AI, though.</p>
+
+              <p>The attention economy capitalized on the value of an always-online network of fragmented attention. It boosted the advertising industry, gave birth to influencers, and changed how consumers engage with brands.</p>
+
+              <p>Later influencers capitalized further on it to create their own brand and market value, with things like digital products and custom content, leading to a new creator economy.</p>
+
+              <p data-t="1.95">Recently I saw an interesting graph, it shows how many new products are being launched on Product Hunt in the age of AI.<label class="sn-ref" for="sn-entry" tabindex="0" role="button" aria-label="Show note">1</label><input type="checkbox" id="sn-entry" class="sn-toggle" tabindex="-1" /><span class="sn"><span class="tag">NOTE 1</span><b>More launches, not more winners.</b> Kim, Kang &amp; Song studied 160,000+ Product Hunt launches. Entry rose sharply after ChatGPT&rsquo;s release, driven disproportionately by solo founders, and much of it was low-commitment and experimental. Team ventures still hold the top rankings. In the counts below, launches rose 41% in 2023, held about flat in 2024 and nearly doubled in 2025. <a href="https://arxiv.org/abs/2605.10291" target="_blank" rel="noopener">arXiv:2605.10291</a>, 2026.</span> It&rsquo;s as if everyone now wants to both be an influencer and a creator.</p>
+
+              <figure class="ex" id="fig-launches">
+                <figcaption class="ex-head">
+                  <span class="ex-label">Figure 1</span>
+                  <span class="ex-title">Product Hunt launches per year, featured and not</span>
+                </figcaption>
+                <div class="ex-body">
+                  <div class="chart" id="ph-chart"></div>
+                  <div class="tip" id="ph-tip" aria-hidden="true"></div>
+                  <ul class="legend">
+                    <li><i style="background: var(--bar-feat)"></i>Featured on the front page</li>
+                    <li><i style="background: var(--bar-rest)"></i>Not featured</li>
+                  </ul>
+                  <details class="tableview">
+                    <summary>Show the numbers</summary>
+                    <table>
+                      <thead><tr><th scope="col">Year</th><th scope="col">Launches</th><th scope="col">Featured</th><th scope="col">Share featured</th></tr></thead>
+                      <tbody>
+                        <tr><td>2019</td><td>27,754</td><td>8,287</td><td>30%</td></tr>
+                        <tr><td>2020</td><td>35,004</td><td>9,040</td><td>26%</td></tr>
+                        <tr><td>2021</td><td>30,749</td><td>12,646</td><td>41%</td></tr>
+                        <tr><td>2022</td><td>29,278</td><td>10,495</td><td>36%</td></tr>
+                        <tr><td>2023</td><td>41,433</td><td>15,330</td><td>37%</td></tr>
+                        <tr><td>2024</td><td>43,027</td><td>7,391</td><td>17%</td></tr>
+                        <tr><td>2025</td><td>82,669</td><td>5,267</td><td>6%</td></tr>
+                        <tr><td>2026*</td><td>207,773</td><td>7,514</td><td>4%</td></tr>
+                      </tbody>
+                    </table>
+                  </details>
+                </div>
+                <p class="ex-foot">Data: <a href="https://hunted.space/product-hunt-pulse" target="_blank" rel="noopener">hunted.space</a>, every Product Hunt launch by year. For 2020&ndash;2025 its totals are within 7% of <a href="https://asanchez.dev/blog/ais-real-impact-on-software-launches-evidence-from-product-hunt/" target="_blank" rel="noopener">asanchez.dev</a>&rsquo;s spam-filtered count. *2026 is the year so far, read Nov 26. The graph that started this post, <a href="https://www.mahl.me/blog/product-hunt-is-swamped-now" target="_blank" rel="noopener">mahl.me</a>, samples one day a year. Before 2024 its daily counts sit close to the number of featured launches on those days rather than all launches, so its jump looks steeper (17&times;).</p>
+              </figure>
+
+              <p data-t="2">Now I find we are living in an era of abundance, almost everywhere you look it feels like there is too much of anything and everything.</p>
+            </section>
+
+            <section class="step" data-step="2">
+              <p><span data-t="2.25">That changes what search has to do.</span> When thousands of results match a query, finding every one of them matters less than getting the first few right, and which few are right depends on who is asking and why. <span data-t="2.45">How do you return what the user wants when far more content matches their query than they will ever read, and when an agent searching on their behalf can only keep so much of it in view at once?</span><label class="sn-ref" for="sn-uber" tabindex="0" role="button" aria-label="Show note">2</label><input type="checkbox" id="sn-uber" class="sn-toggle" tabindex="-1" /><span class="sn"><span class="tag">NOTE 2</span><b>Retrieve wide, keep few.</b> Uber Eats search pulls in tens of thousands of candidates, and ranking discards most of them: &ldquo;retrieval gathers a large set of candidates, and ranking later determines which results are worth keeping.&rdquo; When the team halved search latency, part of the win was cutting broad keyword retrieval that added &ldquo;little incremental value.&rdquo; Sheth et al., <a href="https://www.uber.com/in/en/blog/uber-eats-search-pipeline/" target="_blank" rel="noopener">Halving the Time</a>, Uber Blog, 2026.</span> <span data-t="2.6">What is noise and what is value?</span> <span data-t="2.8">Even worse, how do you anticipate when they are wrong and should offer advice or corrections?</span></p>
+
+              <p>Looking back, the harness should have anticipated that I did not know what I did not know. A question helps with reflection and also with exposing signal to noise ratio. The system could have also picked up on context outside of its own space and that it also does not know what it does not know, that it operates from assumptions just like I do.</p>
+
+              <p>On October 28 I had the agent go back through 752 of my Claude Code sessions since February and classify the 475 times I had stopped or overruled an agent. More than half of them were about intent: in 35% I changed what I wanted after seeing the work, and in another 19% the agent had misread or overstepped what I wanted, while an agent lacking a tool or some knowledge explained fewer than one in ten.</p>
+
+              <figure class="ex" id="fig-stops">
+                <figcaption class="ex-head">
+                  <span class="ex-label">Figure 2</span>
+                  <span class="ex-title">475 times I stopped or overruled an agent, by cause</span>
+                </figcaption>
+                <div class="ex-body">
+                  <ol class="pipe">
+                    <li class="on"><b>752</b> sessions</li>
+                    <li class="on"><b>475</b> stops</li>
+                    <li><b>38</b> clusters</li>
+                    <li><b>6</b> causes</li>
+                  </ol>
+                  <div class="units" id="stops-units" role="img" aria-label="475 stops sorted into six causes. I steered as my intent evolved: 168, 35%. Agent misread or overstepped: 89, 19%. Agent work quality and process: 75, 16%. Things only I could unblock: 64, 13%. Accidental stops, harness friction: 54, 11%. Agent lacked knowledge: 25, 5%. The table below lists the 38 clusters."><canvas aria-hidden="true"></canvas></div>
+                  <div class="tip" id="stops-tip" aria-hidden="true"></div>
+                  <details class="tableview">
+                    <summary>Show the numbers</summary>
+                    <table>
+                      <thead><tr><th scope="col">Cause, then its clusters</th><th scope="col">Stops</th><th scope="col">Share</th></tr></thead>
+                      <tbody>
+                        <tr class="cause"><th scope="row">I steered as my intent evolved</th><td>168</td><td>35%</td></tr>
+                        <tr class="sub"><td>Changed the plan before approving it</td><td>43</td><td></td></tr>
+                        <tr class="sub"><td>Added a requirement midway</td><td>41</td><td></td></tr>
+                        <tr class="sub"><td>Skipped its options to answer in my own words</td><td>29</td><td></td></tr>
+                        <tr class="sub"><td>Added context I hadn&rsquo;t given yet</td><td>25</td><td></td></tr>
+                        <tr class="sub"><td>Switched to something more urgent</td><td>14</td><td></td></tr>
+                        <tr class="sub"><td>Chose the fix myself</td><td>10</td><td></td></tr>
+                        <tr class="sub"><td>Stopped to talk through a tradeoff</td><td>6</td><td></td></tr>
+                        <tr class="cause"><th scope="row">Agent misread or overstepped</th><td>89</td><td>19%</td></tr>
+                        <tr class="sub"><td>Misread what I asked</td><td>20</td><td></td></tr>
+                        <tr class="sub"><td>Investigated more than I asked</td><td>18</td><td></td></tr>
+                        <tr class="sub"><td>Looked in the wrong place</td><td>14</td><td></td></tr>
+                        <tr class="sub"><td>Left something important out of its plan</td><td>11</td><td></td></tr>
+                        <tr class="sub"><td>Built more than the problem needed</td><td>9</td><td></td></tr>
+                        <tr class="sub"><td>Asked too early or unclearly</td><td>9</td><td></td></tr>
+                        <tr class="sub"><td>Changed things when I only asked it to look</td><td>8</td><td></td></tr>
+                        <tr class="cause"><th scope="row">Agent work quality and process</th><td>75</td><td>16%</td></tr>
+                        <tr class="sub"><td>Called it done without checking</td><td>16</td><td></td></tr>
+                        <tr class="sub"><td>Waited or polled in loops</td><td>14</td><td></td></tr>
+                        <tr class="sub"><td>Misread the data</td><td>10</td><td></td></tr>
+                        <tr class="sub"><td>Ignored a constraint</td><td>7</td><td></td></tr>
+                        <tr class="sub"><td>Kept retrying what had failed</td><td>6</td><td></td></tr>
+                        <tr class="sub"><td>Mishandled version control</td><td>5</td><td></td></tr>
+                        <tr class="sub"><td>Deliberated instead of acting</td><td>5</td><td></td></tr>
+                        <tr class="sub"><td>Shared more than it should have</td><td>3</td><td></td></tr>
+                        <tr class="sub"><td>Ignored my machine&rsquo;s limits</td><td>3</td><td></td></tr>
+                        <tr class="sub"><td>Made a wrong technical assumption</td><td>3</td><td></td></tr>
+                        <tr class="sub"><td>Mistook a glitch for a bug</td><td>3</td><td></td></tr>
+                        <tr class="cause"><th scope="row">Things only I could unblock</th><td>64</td><td>13%</td></tr>
+                        <tr class="sub"><td>Signed in again</td><td>16</td><td></td></tr>
+                        <tr class="sub"><td>Fixed my network or setup</td><td>14</td><td></td></tr>
+                        <tr class="sub"><td>Gave it access it was missing</td><td>10</td><td></td></tr>
+                        <tr class="sub"><td>Approved a guarded step</td><td>10</td><td></td></tr>
+                        <tr class="sub"><td>Reported results from a real test</td><td>5</td><td></td></tr>
+                        <tr class="sub"><td>Did a step only I could do</td><td>5</td><td></td></tr>
+                        <tr class="sub"><td>Two sessions got in each other&rsquo;s way</td><td>4</td><td></td></tr>
+                        <tr class="cause"><th scope="row">Accidental stops, harness friction</th><td>54</td><td>11%</td></tr>
+                        <tr class="sub"><td>Accidental or unexplained stops</td><td>31</td><td></td></tr>
+                        <tr class="sub"><td>Stopped to switch model or effort</td><td>13</td><td></td></tr>
+                        <tr class="sub"><td>Restarted a command to set it up again</td><td>5</td><td></td></tr>
+                        <tr class="sub"><td>Interface mishaps</td><td>5</td><td></td></tr>
+                        <tr class="cause"><th scope="row">Agent lacked knowledge</th><td>25</td><td>5%</td></tr>
+                        <tr class="sub"><td>Guessed names or facts instead of checking</td><td>16</td><td></td></tr>
+                        <tr class="sub"><td>Missed tools or conventions it had</td><td>9</td><td></td></tr>
+                      </tbody>
+                    </table>
+                  </details>
+                </div>
+                <p class="ex-foot">Data: each time I pressed Esc to stop an agent or rejected one of its tool calls, in 752 of my Claude Code sessions from February to October 2026. On October 28 Claude Sonnet 5.5 classified each stop from the conversation around it, and Claude Haiku 5.5 classified them again as a check; the two agreed on who could have prevented 56% of them, and disagreed mostly over whether I had steered or the agent had failed. Sonnet grouped the stops into 38 clusters, which the agent and I sorted into six causes; the cluster names are shortened (hover or tap a dot). Not counted: corrections I typed after an agent said it was done.</p>
+              </figure>
+
+              <p data-t="2.95">When the agent then tried to predict, from each request alone, the specific thing I would raise, it got it right 6% of the time, although it named the right area about half the time. Before each of those changes of mind an agent had already spent a median of 12 minutes and 12 tool calls, such as searches, file reads and commands, on work I was about to redirect. I had been finding out what I wanted by reacting to what the agents made, and counting most of those reactions as their failures.</p>
+
+              <p>Granted, that&rsquo;s sort of a skill issue on my part. It can be tempting to forget this so-called superintelligence that we have is nothing more than an illusion, especially because through text much of the nuance is lost. It can&rsquo;t tell my body language, vitals, and any other signal that could help inform if I am using it from a place of true enlightenment or total brainrot slop dopamine-chasing vicious cycle (anyways&hellip; we will save the slot machine gambling of AI for another post, maybe).</p>
+            </section>
+
+            <section class="step" data-step="3">
+              <p><span data-t="3.35">I think search and generation are moving towards a progressive disclosure of complexity.</span><label class="sn-ref" for="sn-pd" tabindex="0" role="button" aria-label="Show note">3</label><input type="checkbox" id="sn-pd" class="sn-toggle" tabindex="-1" /><span class="sn"><span class="tag">NOTE 3</span><b>Progressive disclosure.</b> An interface pattern: show the few things most people need first, and reveal the rest on request. The Xerox Star team used it in the early 1980s; Jakob Nielsen&rsquo;s <a href="https://www.nngroup.com/articles/progressive-disclosure/" target="_blank" rel="noopener">2006 article</a> made the term common.</span> <span data-t="3.6">It means meeting the user where they are, not where the data is.</span><label class="sn-ref" for="sn-spotify" tabindex="0" role="button" aria-label="Show note">4</label><input type="checkbox" id="sn-spotify" class="sn-toggle" tabindex="-1" /><span class="sn"><span class="tag">NOTE 4</span><b>Search answered by the recommender.</b> Spotify sends each search through a small language model that guesses the intent first, then routes it, sometimes to several tools at once. &ldquo;New indie rock releases&rdquo; can become a request to the personalized recommender; &ldquo;latest albums by Lady Gaga&rdquo; also covers a recent single the listener may have loosely called an album. The router sees only the query; personalization happens in the tools it calls. Palumbo et al., <a href="https://research.atspotify.com/2025/9/you-say-search-i-say-recs-a-scalable-agentic-approach-to-query-understanding" target="_blank" rel="noopener">You Say Search, I Say Recs</a>, Spotify Research, 2025.</span> <span data-t="3.85">Using what a system can learn about my current task and session, not only the words I typed, then fitting the results to what I am trying to do right now rather than to a profile of what I did before.</span></p>
+
+              <p>A system should start from the little I can say at first, put something concrete and cheap in front of me early, a sample, a sketch or a short list instead of a finished answer or twenty pages of results, and reveal more of the space as my reactions show what I care about. Questions help when they are about a decision that would change the outcome, but in my sessions the agent mostly asked about what it didn&rsquo;t know rather than about what I would care about, and 29 times I skipped its multiple-choice options to type my own answer. If I had to measure it, I would count how long it takes before I react to something concrete, and how many turns pass before my intent stops changing.</p>
+
+              <p data-t="3.9">On October 22 I asked the agent to make a short video showing how the whole platform would work end to end, and watching it made me ask whether it already existed. When the agent looked back at that week on October 28, it pointed out that my reactions to concrete things, the video, the map of competitors and the data from my own sessions, had moved us forward more than any of its questions.</p>
+            </section>
+
+            <section class="step step-last" data-step="4">
+              <p data-t="4.6">Because of all this abundance, I think we are entering the era of discovery tools. With almost anything I can think of already built, or a few prompts away from being built, the problem has moved from finding options to choosing between them, the paradox of choice. The tools I am looking forward to will meet me where I am, put a handful of good fits in front of me early, and let my reactions do the rest.<span class="caret" aria-hidden="true"></span></p>
+            </section>
+          </div>
+
+          <div class="close" data-t="4.6" data-line="0.25" aria-hidden="true"><i class="beat beat-end" data-t="6" data-line="0.12"></i></div>
+        </div>
+      </div>
+
+      <div class="after">
+        <hr />
+
+        <h2 id="sources">Sources &amp; further reading</h2>
+        <ol class="src">
+          <li><span class="n">1</span><span>Georges, <a href="https://www.mahl.me/blog/product-hunt-is-swamped-now" target="_blank" rel="noopener">Product Hunt is swamped now</a>, mahl.me, May 2026.</span></li>
+          <li><span class="n">2</span><span>Hunted.Space, <a href="https://hunted.space/product-hunt-pulse" target="_blank" rel="noopener">Product Hunt Pulse</a>, launches per day since 2013. Read Nov 26, 2026.</span></li>
+          <li><span class="n">3</span><span>Antonio S&aacute;nchez, <a href="https://asanchez.dev/blog/ais-real-impact-on-software-launches-evidence-from-product-hunt/" target="_blank" rel="noopener">AI&rsquo;s Real Impact on Software Launches: Evidence from Product Hunt</a>, Feb 2026.</span></li>
+          <li><span class="n">4</span><span>Hyunso Kim, Hyo Kang &amp; Jaeyong Song, <a href="https://arxiv.org/abs/2605.10291" target="_blank" rel="noopener">Generative AI Fuels Solo Entrepreneurship, but Teams Still Lead at the Top</a>, arXiv, May 2026.</span></li>
+          <li><span class="n">5</span><span>Nimish Sheth, Daniel Cai, Saurabh Kathpalia et al., <a href="https://www.uber.com/in/en/blog/uber-eats-search-pipeline/" target="_blank" rel="noopener">Halving the Time: How Uber Eats Rebuilt Its Search Pipeline</a>, Uber Blog, Sep 2026.</span></li>
+          <li><span class="n">6</span><span>Jakob Nielsen, <a href="https://www.nngroup.com/articles/progressive-disclosure/" target="_blank" rel="noopener">Progressive Disclosure</a>, Nielsen Norman Group, 2006.</span></li>
+          <li><span class="n">7</span><span>Enrico Palumbo et al., <a href="https://research.atspotify.com/2025/9/you-say-search-i-say-recs-a-scalable-agentic-approach-to-query-understanding" target="_blank" rel="noopener">You Say Search, I Say Recs: A Scalable Agentic Approach to Query Understanding and Exploratory Search at Spotify</a>, Spotify Research, Sep 2025.</span></li>
+          <li><span class="n">8</span><span>Peter Wilczynski, <a href="https://blog.palantir.com/ontology-oriented-software-development-68d7353fdb12" target="_blank" rel="noopener">Ontology-Oriented Software Development</a>, Palantir Blog, Jan 2024.</span></li>
+        </ol>
+
+        <footer>
+          <p><a href="/">&larr; back home</a></p>
+        </footer>
+      </div>
+    </main>
+
+    <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+
+    <script>
+    (function(){
+      "use strict";
+      var root = document.documentElement;
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* Product Hunt launches per year, all and featured.
+         Source: hunted.space, read 2026-11-26; 2026 is the year so far. */
+      var YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+      var TOTAL = [27754, 35004, 30749, 29278, 41433, 43027, 82669, 207773];
+      var FEAT  = [8287, 9040, 12646, 10495, 15330, 7391, 5267, 7514];
+
+      function fmt(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+      function pct(i){ return Math.round(FEAT[i] / TOTAL[i] * 100); }
+      function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+      function ease(t){ t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+      function lerp(a, b, t){ return a + (b - a) * t; }
+
+      /* ---------- theme toggle (shares the site-wide localStorage key) ---------- */
+      var onTheme = [];
+      (function(){
+        var btn = document.querySelector(".theme-toggle");
+        function isDark(){
+          var a = root.getAttribute("data-theme");
+          if (a) return a === "dark";
+          return window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+        function changed(){ onTheme.forEach(function(f){ f(); }); }
+        btn.setAttribute("aria-pressed", isDark() ? "true" : "false");
+        btn.addEventListener("click", function(){
+          var dark = !isDark();
+          root.setAttribute("data-theme", dark ? "dark" : "light");
+          btn.setAttribute("aria-pressed", dark ? "true" : "false");
+          try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch(e){}
+          changed();
+        });
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", changed);
+      })();
+
+      /* ---------- note refs: keyboard parity with click ---------- */
+      document.querySelectorAll(".sn-ref").forEach(function(ref){
+        var box = document.getElementById(ref.getAttribute("for"));
+        ref.setAttribute("aria-expanded", "false");
+        ref.addEventListener("keydown", function(e){
+          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            box.checked = !box.checked;
+            ref.setAttribute("aria-expanded", box.checked ? "true" : "false");
+          }
+        });
+        box.addEventListener("change", function(){ ref.setAttribute("aria-expanded", box.checked ? "true" : "false"); });
+      });
+
+      /* ---------- figure 1: stacked columns, featured at the baseline ---------- */
+      (function(){
+        var box = document.getElementById("ph-chart"), tip = document.getElementById("ph-tip");
+        if (!box) return;
+        var NS = "http://www.w3.org/2000/svg", YMAX = 220000, H = 236, lastW = 0;
+        function el(name, attrs, parent){
+          var e = document.createElementNS(NS, name);
+          for (var k in attrs) e.setAttribute(k, attrs[k]);
+          parent.appendChild(e);
+          return e;
+        }
+        function draw(){
+          var W = Math.round(box.clientWidth);
+          if (!W || W === lastW) return;
+          lastW = W;
+          var m = { l: 38, r: 6, t: 20, b: 24 }, pw = W - m.l - m.r, ph = H - m.t - m.b, base = m.t + ph;
+          box.textContent = "";
+          var svg = el("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "group", "aria-label": "Launches per year. Focus a year for its numbers." }, box);
+          [0, 50000, 100000, 150000, 200000].forEach(function(v){
+            var y = Math.round(base - v / YMAX * ph) + 0.5;
+            el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y, "class": v ? "grid" : "axis" }, svg);
+            el("text", { x: m.l - 7, y: y + 4, "text-anchor": "end", "class": "tick" }, svg).textContent = v ? v / 1000 + "K" : "0";
+          });
+          var band = pw / YEARS.length, bw = Math.min(24, Math.floor(band * 0.56));
+          YEARS.forEach(function(yr, i){
+            var g = el("g", { "class": "bar" }, svg);
+            var x = Math.round(m.l + band * i + (band - bw) / 2);
+            var hF = FEAT[i] / YMAX * ph, top = base - TOTAL[i] / YMAX * ph, mid = base - hF - 2, r = Math.min(4, (mid - top) / 2);
+            el("rect", { x: x, y: base - hF, width: bw, height: hF, "class": "seg-feat" }, g);
+            el("path", { d: "M" + x + " " + mid + "V" + (top + r) + "Q" + x + " " + top + " " + (x + r) + " " + top + "H" + (x + bw - r) + "Q" + (x + bw) + " " + top + " " + (x + bw) + " " + (top + r) + "V" + mid + "Z", "class": "seg-rest" }, g);
+            el("text", { x: x + bw / 2, y: base + 16, "text-anchor": "middle", "class": "tick" }, svg).textContent = yr === 2026 ? "2026*" : String(yr);
+            // selective direct labels: the year before the flood, and the latest
+            if (yr === 2022 || yr === 2026) el("text", { x: x + bw / 2, y: top - 6, "text-anchor": "middle", "class": "val" }, svg).textContent = Math.round(TOTAL[i] / 1000) + "K";
+            var hit = el("rect", { x: m.l + band * i, y: m.t, width: band, height: ph, "class": "hit", tabindex: "0", role: "img",
+              "aria-label": (yr === 2026 ? "2026 so far, read November 26" : yr) + ": " + fmt(TOTAL[i]) + " launches, " + fmt(FEAT[i]) + " featured (" + pct(i) + "%)" }, svg);
+            function on(){ show(i, g, x + bw / 2, Math.max(top, m.t), W); }
+            hit.addEventListener("pointerenter", on);
+            hit.addEventListener("focus", on);
+            hit.addEventListener("pointerleave", off);
+            hit.addEventListener("blur", off);
+          });
+        }
+        function show(i, g, cx, top, W){
+          box.classList.add("hovering");
+          box.querySelectorAll(".bar").forEach(function(b){ b.classList.toggle("on", b === g); });
+          tip.textContent = "";
+          var s = document.createElement("strong");
+          s.textContent = fmt(TOTAL[i]) + " launches";
+          tip.appendChild(s);
+          var y = document.createElement("div");
+          y.textContent = YEARS[i] === 2026 ? "2026 so far, read Nov 26" : String(YEARS[i]);
+          tip.appendChild(y);
+          [[TOTAL[i] - FEAT[i], "not featured", "var(--bar-rest)"], [FEAT[i], "featured, " + pct(i) + "%", "var(--bar-feat)"]].forEach(function(row){
+            var d = document.createElement("div");
+            d.className = "row";
+            d.style.setProperty("--c", row[2]);
+            d.textContent = fmt(row[0]) + " " + row[1];
+            tip.appendChild(d);
+          });
+          var left = box.offsetLeft + cx, right = cx > W / 2;
+          tip.style.left = left + "px";
+          tip.style.top = (box.offsetTop + Math.min(top, 140)) + "px";
+          tip.style.transform = right ? "translateX(calc(-100% - 16px))" : "translateX(16px)";
+          tip.classList.add("on");
+        }
+        function off(){
+          box.classList.remove("hovering");
+          box.querySelectorAll(".bar.on").forEach(function(b){ b.classList.remove("on"); });
+          tip.classList.remove("on");
+        }
+        var drawn = false;
+        function begin(){
+          if (drawn) return;
+          drawn = true;
+          draw();
+          if ("ResizeObserver" in window) new ResizeObserver(draw).observe(box);
+          else window.addEventListener("resize", draw);
+        }
+        if ("IntersectionObserver" in window) {
+          var seen = new IntersectionObserver(function(es){ if (es.some(function(e){ return e.isIntersecting; })) { seen.disconnect(); begin(); } }, { rootMargin: "800px 0px" });
+          seen.observe(box);
+        } else begin();
+      })();
+
+      /* ---------- figure 2: one dot per stop. As the figure rises, each dot is read
+         (a scan colors it), joins its cluster, then its cause. The table is the data. ---------- */
+      (function(){
+        var box = document.getElementById("stops-units");
+        if (!box) return;
+        var body = box.parentNode, tip = document.getElementById("stops-tip");
+        var canvas = box.querySelector("canvas"), ctx = canvas.getContext("2d");
+        var steps = body.querySelectorAll(".pipe li"), STEP_AT = [0, 0.02, 0.4, 0.76];
+        function mulberry(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+        function clamp01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+        function ease(t){ return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+        var causes = [], clusters = [], dots = [], rnd = mulberry(475);
+        body.querySelectorAll(".tableview tbody tr").forEach(function(tr){
+          var n = parseInt(tr.cells[1].textContent, 10);
+          if (tr.classList.contains("cause")) causes.push({ label: tr.cells[0].textContent, n: n, share: tr.cells[2].textContent, q: 0 });
+          else clusters.push({ name: tr.cells[0].textContent, n: n, k: causes.length - 1 });
+        });
+        clusters.forEach(function(cl, c){
+          for (var j = 0; j < cl.n; j++) dots.push({ k: cl.k, c: c, j: j, q: causes[cl.k].q++, jx: rnd() - 0.5, jy: rnd() - 0.5, st: rnd(), st2: rnd() });
+        });
+        var N = dots.length, INTENT = causes[0].n + causes[1].n, pos = new Float32Array(N * 2);
+
+        function label(cls, text, note){
+          var s = document.createElement("span"), em = document.createElement("em");
+          s.className = cls; s.setAttribute("aria-hidden", "true"); s.textContent = text;
+          em.textContent = note; s.appendChild(em); box.appendChild(s);
+          return { el: s, o: -1 };
+        }
+        var labels = causes.map(function(cause){ return label("u-lbl", cause.label, cause.n + " · " + cause.share); });
+        var bandLbl = label("u-lbl u-band", "about my intent", INTENT + " of " + N + " · " + Math.round(INTENT / N * 100) + "%");
+
+        /* layout: bars of R rows, filled a column at a time so a bar's length is its count */
+        var W = 0, H = 0, P = 8, R = 4, L = 18, X0 = 8, rad = 3, lw = 1.4, dpr = 1, rows = [], band = { y: 0, h: 0 };
+        function pack(scale, aw){
+          var s = P * 0.56 * scale, gap = P * scale, shelves = [], cur = null, total = -gap;
+          clusters.forEach(function(cl){
+            var r = s * Math.sqrt(cl.n) + rad, d = 2 * r;
+            if (!cur || cur.w + gap + d > aw) { cur = { items: [], w: -gap, h: 0 }; shelves.push(cur); }
+            cur.items.push({ cl: cl, r: r }); cur.w += gap + d; cur.h = Math.max(cur.h, d);
+          });
+          shelves.forEach(function(sh){ total += sh.h + gap; });
+          return { s: s, gap: gap, shelves: shelves, total: total };
+        }
+        function layout(){
+          var w = Math.round(box.clientWidth);
+          if (!w || w === W) return false;
+          W = w;
+          L = W < 420 ? 16 : 19;
+          P = Math.max(5, Math.min(12, Math.floor((W - 2 * X0) / Math.ceil(causes[0].n / R))));
+          rad = P * 0.36; lw = Math.max(1.1, P * 0.17);
+          var gap = Math.round(P * 1.2), y = 6;
+          band.y = y; y += L;
+          rows = causes.map(function(cause, k){
+            var row = { top: y, dots: y + L };
+            y += L + R * P;
+            if (k === 1) { y += 7; band.h = y - band.y; }
+            if (k < causes.length - 1) y += gap;
+            return row;
+          });
+          H = y + 6;
+          box.style.height = H + "px";
+          dpr = Math.min(2, window.devicePixelRatio || 1);
+          canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+          var aw = W - 2 * X0, top = band.y + 4, ah = H - top - 8;
+          dots.forEach(function(d){ d.bx = X0 + Math.floor(d.q / R) * P + P / 2; d.by = rows[d.k].dots + (d.q % R) * P + P / 2; });
+          // before it is read: a loose field, every dot in a random cell of a jittered grid
+          var fc = Math.ceil(Math.sqrt(N * aw / ah)), fr = Math.ceil(N / fc), cw = aw / fc, ch = ah / fr, cell = [], shuffle = mulberry(fc * 1000 + fr), i, r, t;
+          for (i = 0; i < fc * fr; i++) cell.push(i);
+          for (i = cell.length - 1; i > 0; i--) { r = Math.floor(shuffle() * (i + 1)); t = cell[i]; cell[i] = cell[r]; cell[r] = t; }
+          dots.forEach(function(d, i){
+            d.fx = X0 + (cell[i] % fc + 0.5 + d.jx * 0.7) * cw; d.fy = top + (Math.floor(cell[i] / fc) + 0.5 + d.jy * 0.7) * ch;
+            d.fu = (d.fx - X0) / aw;
+          });
+          // clusters: sunflower clumps on shelves, in cause order
+          var pk = pack(1, aw), scale = 1;
+          for (i = 0; i < 14 && pk.total > ah - 4; i++) { scale *= 0.93; pk = pack(scale, aw); }
+          y = top + (ah - pk.total) / 2;
+          pk.shelves.forEach(function(sh){
+            var x = X0 + (aw - sh.w) / 2;
+            sh.items.forEach(function(it){ it.cl.cx = x + it.r; it.cl.cy = y + sh.h / 2; x += 2 * it.r + pk.gap; });
+            y += sh.h + pk.gap;
+          });
+          dots.forEach(function(d){ var cl = clusters[d.c], a = d.j * 2.39996, rr = pk.s * Math.sqrt(d.j + 0.5); d.cx = cl.cx + Math.cos(a) * rr; d.cy = cl.cy + Math.sin(a) * rr; });
+          labels.forEach(function(l, k){ l.el.style.lineHeight = L + "px"; l.el.style.transform = "translate(" + X0 + "px," + rows[k].top + "px)"; });
+          bandLbl.el.style.lineHeight = L + "px"; bandLbl.el.style.transform = "translate(" + X0 + "px," + band.y + "px)";
+          return true;
+        }
+
+        var col = {};
+        function rgba(hex, a){ var h = hex.replace("#", ""); if (h.length === 3) h = h.replace(/./g, "$&$&"); var n = parseInt(h, 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
+        function readColors(){
+          var cs = getComputedStyle(box), soft = cs.getPropertyValue("--ink-soft").trim();
+          col.you = cs.getPropertyValue("--you-mark").trim();
+          col.rest = cs.getPropertyValue("--bar-rest").trim();
+          col.unread = rgba(soft, 0.42); col.scan = rgba(soft, 0.35); col.band = rgba(col.you, 0.12);
+        }
+
+        var p = -1, drawn = -2, hover = -1, lit = -1;
+        function fade(l, o){ if (o !== l.o) { l.o = o; l.el.style.opacity = o; } }
+        function draw(){
+          var q = p, i, d, paths = [], bo = clamp01((q - 0.88) / 0.08), scan = clamp01((q - 0.05) / 0.2);
+          drawn = q;
+          if (q < 0.5 && hover >= 0) { hover = -1; tip.classList.remove("on"); }
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, W, H);
+          if (bo > 0) {
+            var x0 = 0.5, y0 = band.y + 0.5, x1 = W - 0.5, y1 = band.y + band.h, rr = 6;
+            ctx.globalAlpha = bo; ctx.fillStyle = col.band; ctx.beginPath();
+            ctx.moveTo(x0 + rr, y0); ctx.arcTo(x1, y0, x1, y1, rr); ctx.arcTo(x1, y1, x0, y1, rr); ctx.arcTo(x0, y1, x0, y0, rr); ctx.arcTo(x0, y0, x1, y0, rr);
+            ctx.fill(); ctx.globalAlpha = 1;
+          }
+          if (scan > 0 && scan < 1) { ctx.fillStyle = col.scan; ctx.fillRect(Math.round(X0 + scan * (W - 2 * X0)), band.y, 1, H - band.y - 4); }
+          for (i = 0; i < 8; i++) paths.push(new Path2D());
+          for (i = 0; i < N; i++) {
+            d = dots[i];
+            var read = clamp01((q - 0.02 - 0.2 * d.fu) / 0.06);
+            var m1 = ease(clamp01((q - 0.24 - 0.06 * d.st) / 0.18));
+            var m2 = ease(clamp01((q - 0.6 - 0.12 * (0.7 * d.k / 5 + 0.3 * d.st2)) / 0.2));
+            var x = d.fx + (d.cx - d.fx) * m1, y = d.fy + (d.cy - d.fy) * m1;
+            x += (d.bx - x) * m2; y += (d.by - y) * m2;
+            pos[i * 2] = x; pos[i * 2 + 1] = y;
+            var r = rad * (1 + 0.6 * Math.sin(Math.PI * read)), s = read < 0.5 ? 0 : d.k === 0 ? 1 : d.k === 1 ? 2 : 3;
+            if (s === 2) r = Math.max(0.6, r - lw / 2);
+            var path = paths[s + (hover >= 0 && d.c !== hover ? 4 : 0)];
+            path.moveTo(x + r, y); path.arc(x, y, r, 0, 6.2832);
+          }
+          ctx.lineWidth = lw;
+          for (i = 0; i < 8; i++) {
+            ctx.globalAlpha = i > 3 ? 0.22 : 1;
+            if ((i & 3) === 2) { ctx.strokeStyle = col.you; ctx.stroke(paths[i]); }
+            else { ctx.fillStyle = (i & 3) === 0 ? col.unread : (i & 3) === 1 ? col.you : col.rest; ctx.fill(paths[i]); }
+          }
+          ctx.globalAlpha = 1;
+          labels.forEach(function(l, k){ fade(l, clamp01((q - 0.72 - 0.035 * k) / 0.08)); });
+          fade(bandLbl, bo);
+          var n = 0;
+          while (n < STEP_AT.length && q >= STEP_AT[n]) n++;
+          if (n !== lit) { lit = n; steps.forEach(function(li, j){ li.classList.toggle("on", j < n); }); }
+        }
+
+        /* progress follows the scroll: 0 when half the figure is in view, 1 when it sits centered in
+           the part of the window the text owns (below the stage's top 42% on narrow screens) */
+        var goal = 0, raf = 0, lastNow = 0, active = false, ready = false;
+        function target(){
+          if (reduce) return 1;
+          var vh = window.innerHeight || 1, top = window.innerWidth < 1024 && !root.classList.contains("no-webgl") ? 0.42 * vh : 0;
+          var room = vh - top, end = top + Math.max(0, (room - H) / 2), start = Math.max(vh - 0.5 * Math.min(H, room), end + 0.4 * vh);
+          return clamp01((start - box.getBoundingClientRect().top) / (start - end));
+        }
+        function frame(now){
+          raf = 0;
+          goal = target();
+          var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 1 / 60;
+          if (p < 0 || reduce) p = goal;
+          else { p += (goal - p) * (1 - Math.exp(-dt / 0.14)); if (Math.abs(goal - p) < 0.0008) p = goal; }
+          if (p !== drawn) draw();
+          if (p !== goal) { lastNow = now; raf = requestAnimationFrame(frame); } else lastNow = 0;
+        }
+        function request(){ if (active && ready && !raf) raf = requestAnimationFrame(frame); }
+
+        /* hover or tap a dot: name its cluster and light it */
+        function pick(e){
+          if (p < 0.5) return -1;
+          var b = canvas.getBoundingClientRect(), mx = e.clientX - b.left, my = e.clientY - b.top, best = -1, bd = Math.max(P, 9) * Math.max(P, 9);
+          for (var i = 0; i < N; i++) { var dx = pos[i * 2] - mx, dy = pos[i * 2 + 1] - my, dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; } }
+          return best < 0 ? -1 : dots[best].c;
+        }
+        function setHover(c, e){
+          var changed = c !== hover;
+          hover = c;
+          if (c < 0) tip.classList.remove("on");
+          else {
+            var cl = clusters[c], b = canvas.getBoundingClientRect(), mx = e.clientX - b.left, my = e.clientY - b.top;
+            if (changed) {
+              tip.textContent = "";
+              var s = document.createElement("strong"), n = document.createElement("div"), row = document.createElement("div");
+              s.textContent = cl.name; n.textContent = cl.n + " of " + N + " stops";
+              row.className = "row"; row.style.setProperty("--c", cl.k < 2 ? col.you : col.rest); row.textContent = causes[cl.k].label;
+              tip.appendChild(s); tip.appendChild(n); tip.appendChild(row);
+            }
+            tip.style.left = (box.offsetLeft + mx) + "px";
+            tip.style.top = (box.offsetTop + my) + "px";
+            tip.style.transform = "translate(" + (mx > W / 2 ? "calc(-100% - 14px)" : "14px") + "," + (my < 110 ? "16px" : "calc(-100% - 10px)") + ")";
+            tip.classList.add("on");
+          }
+          if (changed && p >= 0) draw();
+        }
+        canvas.addEventListener("pointermove", function(e){ setHover(pick(e), e); });
+        canvas.addEventListener("pointerdown", function(e){ setHover(pick(e), e); });
+        canvas.addEventListener("pointerleave", function(e){ if (e.pointerType !== "touch") setHover(-1); });
+        canvas.addEventListener("pointercancel", function(){ setHover(-1); });
+        document.addEventListener("pointerdown", function(e){ if (hover >= 0 && e.target !== canvas) setHover(-1); });
+
+        layout(); readColors(); ready = true;
+        if ("ResizeObserver" in window) new ResizeObserver(function(){ if (layout() && p >= 0) draw(); request(); }).observe(box);
+        else window.addEventListener("resize", function(){ if (layout() && p >= 0) draw(); request(); });
+        onTheme.push(function(){ readColors(); if (p >= 0) draw(); });
+        window.addEventListener("scroll", request, { passive: true });
+        if ("IntersectionObserver" in window) new IntersectionObserver(function(es){ active = es[es.length - 1].isIntersecting; request(); }, { rootMargin: "200px 0px" }).observe(box);
+        else { active = true; request(); }
+      })();
+
+      /* ---------- the story as one number, T ----------
+         T < 0 the opening; 0..1 the side project; 1..2 the flood; 2..3 search;
+         3..4 disclosure; 4..4.6 the ending; 4.6..6 the close: a handful, everything, a handful.
+         Anchors in the text pin T to scroll positions; between them T follows the scroll, eased. */
+      var R_MATCH = 1.15;
+      function state(T){
+        function s(a, b){ return ease((T - a) / (b - a)); }
+        var o = {};
+        o.u = clamp(T, 0, 1);
+        // the opening falls into today's space; "that flood didn't start with AI" rewinds it to 2019 and replays it
+        o.year = T < 1.32 ? lerp(2026.95, 2019.95, s(1.02, 1.3)) : 2019.95 + 7 * s(1.35, 1.95);
+        o.calm = s(5.72, 5.95);
+        o.base = (0.6 * s(-0.85, -0.6) + 0.4 * s(1.0, 1.3)) * (1 - 0.6 * o.calm);
+        o.feat = s(1.05, 1.3) * (1 - s(2.0, 2.2));
+        var tr = s(-0.62, -0.5) * lerp(1, 0.4, s(1.0, 1.3));
+        tr = lerp(tr, tr * 0.3, s(4.0, 4.4));
+        o.trail = tr * (1 - s(4.6, 4.8));
+        o.matchR = R_MATCH * s(2.02, 2.25);
+        o.match = s(2.0, 2.1) * (1 - s(3.0, 3.25));
+        o.shown = s(2.28, 2.45) * (1 - s(3.05, 3.3));
+        o.data = s(2.47, 2.6) * (1 - s(4.0, 4.4));
+        o.need = s(2.62, 2.8);
+        o.disc = s(3.02, 3.2) * (1 - s(4.6, 4.85));
+        // progressive disclosure: the revealed region around you widens in three steps, then once more at the end
+        o.discR = 0.6 * s(3.1, 3.35) + 0.45 * s(3.4, 3.6) + 0.6 * s(3.65, 3.85) + 0.65 * s(4.0, 4.5);
+        o.found = T >= 3 ? ease((o.discR - 1.4) / 0.2) : 0;
+        o.line = s(4.05, 4.5);
+        o.lineA = 1 - s(4.6, 4.85);
+        // the close: a handful is shown; showing more and more turns it all into noise; then a handful again
+        o.show = s(4.85, 5.0);
+        o.showF = s(5.05, 5.5) * (1 - s(5.65, 5.8));      // 0: three shown, 1: everything, on a log scale
+        o.noise = s(5.3, 5.5) * (1 - s(5.65, 5.75));
+        o.pick = clamp(s(4.85, 5.0) * (1 - s(5.05, 5.2)) + s(5.7, 5.85), 0, 1);
+        o.full = 1 - s(-0.45, -0.05) + s(4.6, 4.8);
+        o.you = s(-0.56, -0.48);
+        o.labels = s(-0.6, -0.47) * (1 - s(1.0, 1.15));
+        o.date = s(-0.3, -0.1) * (1 - s(1.0, 1.1));
+        o.key = s(-0.55, -0.45);
+        return o;
+      }
+
+      var stageEl = document.getElementById("stage"), textEl = document.querySelector(".text");
+      var wide = window.matchMedia("(min-width: 64rem)");
+      var W = 0, H = 0, RF = { x: 0, y: 0, w: 0, h: 0 }, RD = RF, R = RF, rectKey = "";
+
+      /* ---------- the stage: plain WebGL2, drawn only while something moves ---------- */
+      function createStage(){
+        var api = { ok: false, frame: function(){}, project: function(){ return null; }, resize: function(){} };
+        var canvas = document.getElementById("scene");
+        var gl = canvas.getContext("webgl2", { antialias: true, alpha: false });
+        if (!gl) { root.classList.add("no-webgl"); return api; }
+
+        function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+        var rnd = mulberry32(20261125);
+        function gauss(){ var u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+        function add(a, b){ return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+        function sub(a, b){ return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+        function mul(a, s){ return [a[0] * s, a[1] * s, a[2] * s]; }
+        function dot(a, b){ return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+        function cross(a, b){ return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+        function norm(a){ return mul(a, 1 / (Math.sqrt(dot(a, a)) || 1)); }
+        function mix3(a, b, t){ return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
+        function inSphere(r){ var p; do { p = [rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1]; } while (dot(p, p) > 1); return mul(p, r); }
+
+        /* ---- the space: positions are illustrative, counts are real ---- */
+        var small = Math.min(window.innerWidth, window.innerHeight) < 700 || (navigator.hardwareConcurrency || 8) <= 4;
+        var PER = small ? 20 : 10;                     // launches per dot
+        document.getElementById("perdot").textContent = PER;
+
+        var DATA = [0, 0, 0];                          // where the data is
+        var WP = [[-1.8, 1.6, -0.6], [-0.9, 0.9, -1.3], [-0.2, 1.7, -0.2], [0.7, 0.9, -0.9], [0.1, 0.1, 0.1], [1.3, 0.3, -0.2], [2.2, -0.4, 0.9]];
+        var WP_DATE = ["aug 25", "oct 4", "oct 12", "oct 20", "oct 21", "oct 28", "oct 28"];
+        var YOU = WP[6];                               // where the dance ended
+        var outward = norm(sub(YOU, DATA)), side = norm(cross(outward, [0, 1, 0]));
+        var NEED = add(YOU, mul(norm(add(add(mul(outward, 0.55), mul(side, 0.8)), [0, -0.3, 0])), 1.45));
+
+        var clusters = [{ c: DATA, s: 0.72, w: 5 }, { c: add(YOU, [0.25, -0.2, 0.15]), s: 0.38, w: 1.1 }];
+        while (clusters.length < 30) {
+          var cc = inSphere(3.4);
+          if (Math.sqrt(dot(sub(cc, NEED), sub(cc, NEED))) < 0.9) continue;   // keep what you needed out in the long tail
+          clusters.push({ c: cc, s: 0.2 + rnd() * 0.32, w: 0.6 + rnd() * 0.9 });
+        }
+        var n = 1;
+        YEARS.forEach(function(y, i){ n += Math.round(TOTAL[i] / PER); });
+        var pos = new Float32Array(n * 3), meta = new Float32Array(n * 3), k = 0;
+        YEARS.forEach(function(y, i){
+          var nd = Math.round(TOTAL[i] / PER), nf = Math.round(FEAT[i] / PER), boost = 1 + (y - 2019) * 0.35, wsum = 0;
+          clusters.forEach(function(cl, j){ wsum += cl.w * (j === 0 ? boost : 1); });
+          for (var d = 0; d < nd; d++, k++) {
+            var p;
+            if (rnd() < 0.08) p = inSphere(4.6);
+            else {
+              var pick = rnd() * wsum, j = 0;
+              while ((pick -= clusters[j].w * (j === 0 ? boost : 1)) > 0 && j < clusters.length - 1) j++;
+              p = add(clusters[j].c, [gauss() * clusters[j].s, gauss() * clusters[j].s, gauss() * clusters[j].s]);
+            }
+            pos.set(p, k * 3);
+            meta.set([y, d < nf ? 1 : 0, rnd()], k * 3);   // year, featured, birth jitter
+          }
+        });
+        pos.set(NEED, k * 3);                           // what you needed: a launch that was there all along
+        meta.set([2021, 0, 0.1], k * 3);
+
+        /* a search from where you are: everything near you matches; the top ten lean toward where the data is */
+        var inQ = [];
+        for (var q = 0; q < n; q++) {
+          var dx = pos[q * 3] - YOU[0], dy = pos[q * 3 + 1] - YOU[1], dz = pos[q * 3 + 2] - YOU[2];
+          if (dx * dx + dy * dy + dz * dz < R_MATCH * R_MATCH) { inQ.push(q); }
+        }
+        function toData(q){ var x = pos[q * 3], y = pos[q * 3 + 1], z = pos[q * 3 + 2]; return x * x + y * y + z * z; }
+        var SHOWN = inQ.sort(function(a, b){ return toData(a) - toData(b); }).slice(0, 10).map(function(q){ return [pos[q * 3], pos[q * 3 + 1], pos[q * 3 + 2]]; });
+
+        /* the close shows launches in rank order: what you needed and the two nearest you (a handful), then the rest in no order */
+        function dist2(q, p){ var x = pos[q * 3] - p[0], y = pos[q * 3 + 1] - p[1], z = pos[q * 3 + 2] - p[2]; return x * x + y * y + z * z; }
+        var h1 = -1, h2 = -1, rank = new Float32Array(n), order = [], shuffle = mulberry32(475);
+        for (var q1 = 0; q1 < n - 1; q1++) if (dist2(q1, YOU) >= 0.09 && (h1 < 0 || dist2(q1, YOU) < dist2(h1, YOU))) h1 = q1;
+        var HAND = [[pos[h1 * 3], pos[h1 * 3 + 1], pos[h1 * 3 + 2]]];
+        for (q1 = 0; q1 < n - 1; q1++) if (dist2(q1, YOU) >= 0.09 && dist2(q1, HAND[0]) >= 0.09 && (h2 < 0 || dist2(q1, YOU) < dist2(h2, YOU))) h2 = q1;
+        HAND.push([pos[h2 * 3], pos[h2 * 3 + 1], pos[h2 * 3 + 2]]);
+        for (q1 = 0; q1 < n - 1; q1++) if (q1 !== h1 && q1 !== h2) order.push(q1);
+        for (q1 = order.length - 1; q1 > 0; q1--) { var sw = Math.floor(shuffle() * (q1 + 1)), tq = order[q1]; order[q1] = order[sw]; order[sw] = tq; }
+        rank[n - 1] = 0; rank[h1] = 1; rank[h2] = 2;
+        order.forEach(function(q, i){ rank[q] = i + 3; });
+
+        /* the dance: a Catmull-Rom path through the side project's waypoints, wobbling between them */
+        function catmull(a, b, c, d, t){
+          var t2 = t * t, t3 = t2 * t;
+          return [0, 1, 2].map(function(i){ return 0.5 * (2 * b[i] + (c[i] - a[i]) * t + (2 * a[i] - 5 * b[i] + 4 * c[i] - d[i]) * t2 + (3 * b[i] - a[i] - 3 * c[i] + d[i]) * t3); });
+        }
+        function trailAt(u){
+          var segs = WP.length - 1, f = clamp(u, 0, 1) * segs, i = Math.min(Math.floor(f), segs - 1), t = f - i;
+          var p = catmull(WP[Math.max(0, i - 1)], WP[i], WP[i + 1], WP[Math.min(segs, i + 2)], t), w = Math.sin(Math.PI * t);
+          return [p[0] + w * Math.cos(u * 31) * 0.06, p[1] + w * Math.sin(u * 44) * 0.08, p[2]];
+        }
+        var TRAIL_N = 360, TRAIL = [];
+        for (var s = 0; s < TRAIL_N; s++) TRAIL.push(trailAt(s / (TRAIL_N - 1)));
+
+        /* ---- camera ---- */
+        function perspective(fovy, aspect, near, far){ var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far); return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) * nf, -1, 0, 0, 2 * far * near * nf, 0]; }
+        function lookAt(e, t){ var z = norm(sub(e, t)), x = norm(cross([0, 1, 0], z)), y = cross(z, x); return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, e), -dot(y, e), -dot(z, e), 1]; }
+        function mat(a, b){ var o = new Float32Array(16); for (var c = 0; c < 4; c++) for (var r = 0; r < 4; r++) { var acc = 0; for (var i = 0; i < 4; i++) acc += a[i * 4 + r] * b[c * 4 + i]; o[c * 4 + r] = acc; } return o; }
+        function lerpK(a, b, t){ return { t: mix3(a.t, b.t, t), d: lerp(a.d, b.d, t), yaw: lerp(a.yaw, b.yaw, t), pitch: lerp(a.pitch, b.pitch, t) }; }
+        function eyeOf(c){ var cp = Math.cos(c.pitch); return add(c.t, [c.d * cp * Math.sin(c.yaw), c.d * Math.sin(c.pitch), c.d * cp * Math.cos(c.yaw)]); }
+        function fovFor(aspect){ return aspect < 1 ? 2 * Math.atan(Math.tan(0.36) / aspect) : 0.72; }
+        /* each view frames the points that matter in its part of the story, for the frame's current shape */
+        var SIDE = Math.atan2(YOU[0] - DATA[0], YOU[2] - DATA[2]) - Math.PI / 2;   // look across the line from the data to you
+        function around(c, r){ return [[r, 0, 0], [-r, 0, 0], [0, r, 0], [0, -r, 0], [0, 0, r], [0, 0, -r]].map(function(o){ return add(c, o); }); }
+        function frameFor(pts, yaw, pitch, aspect, margin){
+          var c = [0, 0, 0];
+          pts.forEach(function(p){ c = add(c, p); });
+          c = mul(c, 1 / pts.length);
+          var P = perspective(fovFor(aspect), aspect, 0.05, 80), lo = 0.5, hi = 60;
+          for (var it = 0; it < 26; it++) {
+            var d = (lo + hi) / 2, m = mat(P, lookAt(eyeOf({ t: c, d: d, yaw: yaw, pitch: pitch }), c)), ok = true;
+            for (var j = 0; j < pts.length && ok; j++) {
+              var p = pts[j], w = m[3] * p[0] + m[7] * p[1] + m[11] * p[2] + m[15];
+              ok = w > 0.1 && Math.abs((m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12]) / w) <= margin && Math.abs((m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13]) / w) <= margin;
+            }
+            if (ok) hi = d; else lo = d;
+          }
+          return { t: c, d: hi, yaw: yaw, pitch: pitch };
+        }
+        /* views for the full window (F) and for the docked frame (D) */
+        var V = {};
+        function fitViews(){
+          var aF = RF.w / Math.max(1, RF.h), aD = RD.h > 0 ? RD.w / RD.h : aF;
+          var path = WP.concat(TRAIL.filter(function(p, j){ return j % 12 === 0; }));
+          V.dance0F = frameFor(path, SIDE - 0.3, 0.22, aF, 0.6);
+          V.zoomF = { t: V.dance0F.t, d: V.dance0F.d * 0.3, yaw: V.dance0F.yaw - 0.7, pitch: V.dance0F.pitch + 0.32 };
+          V.dance0D = frameFor(path, SIDE - 0.3, 0.22, aD, 0.78);
+          V.dance1D = frameFor(path, SIDE + 0.05, 0.26, aD, 0.78);
+          V.floodD = frameFor(around(DATA, 3.6), SIDE + 0.5, 0.32, aD, 0.92);
+          V.searchD = frameFor(around(YOU, R_MATCH + 0.2).concat([DATA, NEED]), SIDE, 0.2, aD, 0.8);
+          V.nearD = frameFor(around(YOU, 1.75), SIDE - 0.2, 0.16, aD, 0.86);
+          V.foundD = frameFor(around(YOU, 0.45).concat(around(NEED, 0.45)), SIDE - 0.05, 0.2, aD, 0.8);
+          V.foundF = frameFor(around(YOU, 0.45).concat(around(NEED, 0.45)), SIDE - 0.05, 0.2, aF, 0.66);
+          V.allF = frameFor(around(DATA, 3.6).concat([YOU, NEED]), SIDE + 0.35, 0.3, aF, 0.94);
+          V.handF = frameFor(around(YOU, 0.3).concat([NEED]).concat(HAND), SIDE - 0.05, 0.2, aF, 0.6);
+        }
+        function camera(T){
+          function s(a, b){ return ease((T - a) / (b - a)); }
+          if (T < -0.45) return lerpK(V.zoomF, V.dance0F, s(-0.95, -0.6));   // out of the box, into the space
+          if (T < 0) return lerpK(V.dance0F, V.dance0D, s(-0.45, -0.05));     // dock beside the text
+          if (T < 1) return lerpK(V.dance0D, V.dance1D, ease(T));
+          if (T < 2) return lerpK(V.dance1D, V.floodD, s(1, 1.3));
+          if (T < 3) return lerpK(V.floodD, V.searchD, s(2, 2.25));
+          if (T < 4) return lerpK(V.searchD, V.nearD, s(3, 3.4));
+          if (T < 4.6) return lerpK(V.nearD, V.foundD, s(4, 4.4));
+          if (T < 4.8) return lerpK(V.foundD, V.foundF, s(4.6, 4.8));        // undock for the end
+          if (T < 5.7) return lerpK(V.foundF, V.allF, s(4.8, 5.25));         // pull back to the whole field
+          return lerpK(V.allF, V.handF, s(5.7, 6));                          // then in, to the handful
+        }
+
+        /* ---- GL ---- */
+        function compile(type, src){
+          var sh = gl.createShader(type);
+          gl.shaderSource(sh, src); gl.compileShader(sh);
+          if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+          return sh;
+        }
+        function program(vs, fs){
+          var pr = gl.createProgram(), u = {};
+          gl.attachShader(pr, compile(gl.VERTEX_SHADER, vs));
+          gl.attachShader(pr, compile(gl.FRAGMENT_SHADER, fs));
+          gl.linkProgram(pr);
+          if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+          for (var i = 0, nu = gl.getProgramParameter(pr, gl.ACTIVE_UNIFORMS); i < nu; i++) {
+            var name = gl.getActiveUniform(pr, i).name;
+            u[name] = gl.getUniformLocation(pr, name);
+          }
+          return { p: pr, u: u };
+        }
+        var cloud, marks;
+        try {
+          cloud = program(
+            "#version 300 es\n" +
+            "layout(location=0) in vec3 aPos; layout(location=1) in vec3 aMeta; layout(location=2) in float aRank;\n" +
+            "uniform mat4 uPV; uniform vec3 uEye, uYou;\n" +
+            "uniform float uYear, uBase, uFeatMix, uMatchR, uMatchMix, uDiscR, uDiscMix, uSize, uMax, uShow, uShowN, uShowBig;\n" +
+            "out float vA; out float vF;\n" +
+            "void main(){\n" +
+            "  float born = clamp((uYear - aMeta.x - aMeta.z * 0.7) / 0.25, 0.0, 1.0);\n" +
+            "  if (born <= 0.0 || uBase <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; vA = 0.0; vF = 0.0; return; }\n" +
+            "  vec3 P = aPos;\n" +
+            "  gl_Position = uPV * vec4(P, 1.0);\n" +
+            "  float d = distance(aPos, uYou);\n" +
+            "  float q = 1.0 - smoothstep(uMatchR - 0.05, uMatchR + 0.05, d);\n" +
+            "  float r = 1.0 - smoothstep(uDiscR - 0.15, uDiscR + 0.15, d);\n" +
+            "  float f = aMeta.y * uFeatMix * (1.0 - smoothstep(0.95, 1.9, uYear - aMeta.x));\n" +   // pink marks only the current year's front page
+            "  float sh = uShow * (1.0 - step(uShowN, aRank));\n" +   // the close: the first uShowN launches in rank order are shown to you
+            "  f = max(f, sh);\n" +
+            "  float a = uBase * born * (1.0 + f * 1.4);\n" +
+            "  a *= mix(1.0, mix(0.3, 1.7, q), uMatchMix);\n" +
+            "  a *= mix(1.0, mix(0.1, 1.6, r), uDiscMix);\n" +
+            "  vA = clamp(a, 0.0, 1.0); vF = f;\n" +
+            "  float s = uSize * (7.0 / max(distance(P, uEye), 0.05)) * (1.0 + f * 0.5) * mix(1.0, 1.0 + 0.35 * r, uDiscMix);\n" +
+            "  s *= 1.0 + sh * uShowBig;\n" +   // the first few shown are big; they shrink as more are shown
+            "  gl_PointSize = clamp(s, 1.0, uMax * (1.0 + sh * uShowBig));\n" +
+            "}",
+            "#version 300 es\nprecision highp float;\n" +
+            "in float vA; in float vF; uniform vec3 uInk, uFeat; out vec4 o;\n" +
+            "void main(){\n" +
+            "  vec2 c = gl_PointCoord * 2.0 - 1.0; float r2 = dot(c, c);\n" +
+            "  if (r2 > 1.0) discard;\n" +
+            "  o = vec4(mix(uInk, uFeat, vF), vA * (1.0 - smoothstep(0.45, 1.0, r2)));\n" +
+            "}"
+          );
+          marks = program(
+            "#version 300 es\n" +
+            "layout(location=0) in vec3 aPos; layout(location=1) in vec4 aCol; layout(location=2) in vec3 aSty;\n" +
+            "uniform mat4 uPV; uniform vec3 uEye; uniform float uDpr;\n" +
+            "out vec4 vC; out float vRing; out float vPx;\n" +
+            "void main(){\n" +
+            "  gl_Position = uPV * vec4(aPos, 1.0);\n" +
+            "  float s = aSty.x * uDpr * mix(1.0, 7.0 / distance(aPos, uEye), aSty.z);\n" +
+            "  gl_PointSize = max(1.0, s); vC = aCol; vRing = aSty.y; vPx = gl_PointSize;\n" +
+            "}",
+            "#version 300 es\nprecision highp float;\n" +
+            "in vec4 vC; in float vRing; in float vPx; uniform float uDpr; out vec4 o;\n" +
+            "void main(){\n" +
+            "  float r = length(gl_PointCoord * 2.0 - 1.0), px = 2.0 / vPx;\n" +
+            "  float a = 1.0 - smoothstep(1.0 - px, 1.0, r);\n" +
+            "  if (vRing > 0.5) a *= smoothstep(1.0 - (2.0 * uDpr + 1.0) * px, 1.0 - 2.0 * uDpr * px, r);\n" +
+            "  if (a <= 0.0) discard;\n" +
+            "  o = vec4(vC.rgb, vC.a * a);\n" +
+            "}"
+          );
+        } catch (err) {
+          console.warn("stage disabled:", err.message);
+          root.classList.add("no-webgl");
+          return api;
+        }
+
+        var cloudVAO = gl.createVertexArray();
+        gl.bindVertexArray(cloudVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, meta, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, rank, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 0, 0);
+
+        var markVAO = gl.createVertexArray(), markBuf = gl.createBuffer();
+        gl.bindVertexArray(markVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, markBuf);
+        gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 40, 0);
+        gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 40, 12);
+        gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 40, 28);
+        gl.bindVertexArray(null);
+
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        /* ---- colours come from the page's own tokens ---- */
+        var col = {};
+        function hex(v){
+          v = v.trim();
+          if (v.length === 4) v = "#" + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+          return [parseInt(v.slice(1, 3), 16) / 255, parseInt(v.slice(3, 5), 16) / 255, parseInt(v.slice(5, 7), 16) / 255];
+        }
+        function readColors(){
+          var cs = getComputedStyle(root);
+          ["porcelain", "ink", "ink-soft", "signal", "prompt", "ok"].forEach(function(name){ col[name] = hex(cs.getPropertyValue("--" + name)); });
+          col.dark = dot(col.porcelain, [0.2126, 0.7152, 0.0722]) < 0.3;
+        }
+        readColors();
+        onTheme.push(function(){ readColors(); force = true; });
+
+        /* ---- labels: HTML over the canvas, so text stays crisp ---- */
+        var holder = document.getElementById("labels"), hud = document.getElementById("hud"), lab = {};
+        function label(id, cls, text){ var e = document.createElement("span"); e.className = "lbl " + cls; e.textContent = text || ""; holder.appendChild(e); lab[id] = e; }
+        label("a", "human", "a custom harness with a formal proof system");
+        label("b", "human", "a platform for orchestration of agents");
+        label("c", "human", "I didn’t know what I didn’t know");
+        label("date", "mono");
+        label("you", "mono");
+        label("data", "mono", "where the data is");
+        label("need", "mono", "what you needed");
+
+        var dpr = 1, pv = null, mk = [], mkArr = new Float32Array(12000), placed = [], sizes = {}, lastSize = "";
+        function project(p){
+          if (!pv || !p) return null;
+          var x = p[0], y = p[1], z = p[2];
+          var cx = pv[0] * x + pv[4] * y + pv[8] * z + pv[12], cy = pv[1] * x + pv[5] * y + pv[9] * z + pv[13], cw = pv[3] * x + pv[7] * y + pv[11] * z + pv[15];
+          if (cw < 0.05) return null;
+          return [R.x + (cx / cw * 0.5 + 0.5) * R.w, R.y + (0.5 - cy / cw * 0.5) * R.h];
+        }
+        // a label's size only changes with its text, so it is measured once, not every frame
+        function sizeOf(id){
+          var e = lab[id], z = sizes[id];
+          if (!z || z.text !== e.textContent) z = sizes[id] = { text: e.textContent, w: e.offsetWidth, h: e.offsetHeight };
+          return z;
+        }
+        function place(id, p, dx, dy, alpha){
+          var e = lab[id], sp = project(p);
+          if (!sp || sp[0] < R.x || sp[0] > R.x + R.w || sp[1] < R.y || sp[1] > R.y + R.h) { e.style.opacity = 0; return; }
+          // labels sit right of their dot unless that would run off the frame; then left; else they clamp
+          var z = sizeOf(id), w = z.w, h = z.h, x = sp[0] + dx, y = sp[1] + dy, right = R.x + R.w;
+          if (x + w > right - 8) x = sp[0] - dx - w >= R.x + 8 ? sp[0] - dx - w : Math.max(R.x + 8, right - 8 - w);
+          // a label that would cover one already placed moves below its dot
+          if (placed.some(function(r){ return x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y; })) y = sp[1] + 10;
+          if (alpha > 0.01) placed.push({ x: x, y: y, w: w, h: h });
+          e.style.opacity = alpha > 0.01 ? alpha : 0;
+          e.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+        }
+        function push(p, c, a, size, ring, persp){ mk.push(p[0], p[1], p[2], c[0], c[1], c[2], a, size, ring, persp); }
+
+        var lastKey = "", force = true;
+        function frame(T, st){
+          // scrolling between beats changes nothing on the stage; skip those frames
+          var key = T.toFixed(5) + "|" + [R.x, R.y, R.w, R.h].map(Math.round).join(",");
+          if (key === lastKey && !force) return;
+          lastKey = key; force = false;
+          if (R.w < 2 || R.h < 2) { for (var id in lab) lab[id].style.opacity = 0; if (hud.textContent) hud.textContent = ""; return; }
+          var cam = camera(T), shownN = Math.round(3 * Math.pow(n / 3, st.showF));
+          var aspect = R.w / R.h, eye = eyeOf(cam), vm = lookAt(eye, cam.t);
+          pv = mat(perspective(fovFor(aspect), aspect, 0.05, 80), vm);
+
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.clearColor(col.porcelain[0], col.porcelain[1], col.porcelain[2], 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.viewport(Math.round(R.x * dpr), Math.round((H - R.y - R.h) * dpr), Math.round(R.w * dpr), Math.round(R.h * dpr));
+
+          gl.useProgram(cloud.p);
+          gl.uniformMatrix4fv(cloud.u.uPV, false, pv);
+          gl.uniform3fv(cloud.u.uEye, eye);
+          gl.uniform3fv(cloud.u.uYou, YOU);
+          gl.uniform1f(cloud.u.uYear, st.year);
+          gl.uniform1f(cloud.u.uBase, st.base * (col.dark ? 0.36 : 0.3));
+          gl.uniform1f(cloud.u.uFeatMix, st.feat);
+          gl.uniform1f(cloud.u.uMatchR, st.matchR);
+          gl.uniform1f(cloud.u.uMatchMix, st.match);
+          gl.uniform1f(cloud.u.uDiscR, st.discR);
+          gl.uniform1f(cloud.u.uDiscMix, st.disc);
+          gl.uniform1f(cloud.u.uShow, st.show);
+          gl.uniform1f(cloud.u.uShowN, shownN);
+          gl.uniform1f(cloud.u.uShowBig, 2.4 * (1 - st.showF));
+          gl.uniform1f(cloud.u.uSize, 2.0 * dpr * Math.sqrt(clamp(R.h / 900, 0.45, 1.2)));
+          gl.uniform1f(cloud.u.uMax, 5.5 * dpr);
+          gl.uniform3fv(cloud.u.uInk, col.ink);
+          gl.uniform3fv(cloud.u.uFeat, col.signal);
+          gl.bindVertexArray(cloudVAO);
+          gl.drawArrays(gl.POINTS, 0, n);
+
+          /* the marks: the path you took, what you were shown, you; at the close, the handful */
+          mk.length = 0;
+          var you = trailAt(st.u), upto = Math.round(st.u * (TRAIL_N - 1));
+          if (st.trail > 0.005) {
+            for (var c = 0; c <= upto; c++) push(TRAIL[c], col.prompt, st.trail * (0.25 + 0.6 * c / Math.max(1, upto)), 2.6, 0, 1);
+          }
+          if (st.line > 0 && st.lineA > 0) {
+            var L = 70, m2 = Math.round(st.line * L);
+            for (var l = 0; l <= m2; l++) push(mix3(YOU, NEED, l / L), mix3(col.prompt, col.ok, l / L), 0.95 * st.lineA, 2.4, 0, 1);
+          }
+          if (st.shown > 0) SHOWN.forEach(function(p){ push(p, col.porcelain, st.shown, 10, 0, 0); push(p, col.signal, st.shown, 7, 0, 0); });
+          if (st.pick > 0) HAND.forEach(function(p){ push(p, col.porcelain, st.pick, 13, 0, 0); push(p, col.signal, st.pick, 9, 0, 0); });
+          if (st.data > 0) push(DATA, col["ink-soft"], st.data, 30, 1, 0);
+          if (st.need > 0) {
+            var na = st.need * (1 - 0.7 * st.noise);
+            push(NEED, col.porcelain, na * st.found, 15, 0, 0);
+            push(NEED, col.ok, na, 11, st.found > 0.5 ? 0 : 1, 0);
+            if (st.pick > 0) push(NEED, col.signal, st.pick, 19, 1, 0);   // what you needed is one of the handful shown
+          }
+          var right = [vm[0], vm[4], vm[8]], up = [vm[1], vm[5], vm[9]];
+          function ring(c, r, color, a){
+            if (a <= 0.01 || r <= 0.01) return;
+            for (var j = 0; j < 220; j++) { var ang = j / 220 * Math.PI * 2; push(add(c, add(mul(right, Math.cos(ang) * r), mul(up, Math.sin(ang) * r))), color, a, 2.2, 0, 0); }
+          }
+          ring(YOU, st.matchR, col["ink-soft"], st.match * 0.8);   // the query: everything inside matches
+          ring(YOU, st.discR, col.prompt, st.disc * 0.9);          // what has been disclosed around you so far
+          if (st.you > 0) {
+            push(you, col.porcelain, st.you, 15, 0, 0);
+            push(you, col.prompt, st.you, 11, 0, 0);
+          }
+
+          gl.useProgram(marks.p);
+          gl.uniformMatrix4fv(marks.u.uPV, false, pv);
+          gl.uniform3fv(marks.u.uEye, eye);
+          gl.uniform1f(marks.u.uDpr, dpr);
+          gl.bindVertexArray(markVAO);
+          gl.bindBuffer(gl.ARRAY_BUFFER, markBuf);
+          if (mkArr.length < mk.length) mkArr = new Float32Array(mk.length * 2);
+          mkArr.set(mk);
+          gl.bufferData(gl.ARRAY_BUFFER, mkArr.subarray(0, mk.length), gl.DYNAMIC_DRAW);
+          gl.drawArrays(gl.POINTS, 0, mk.length / 10);
+          gl.bindVertexArray(null);
+
+          /* labels and readouts */
+          placed.length = 0;
+          place("a", WP[0], 12, -30, st.labels);
+          place("b", WP[2], 12, -30, st.labels * ease((st.u - 0.3) / 0.04));
+          place("c", WP[6], 12, -34, st.labels * ease((st.u - 0.96) / 0.04));
+          lab.date.textContent = WP_DATE[Math.min(6, Math.floor(st.u * 6 + 1e-6))];
+          place("date", you, 12, 6, st.date);
+          lab.you.textContent = T >= 3 && T < 4 ? "where you are" : "you";
+          place("you", YOU, 12, -10, ease((T - 2) / 0.15) * (1 - 0.6 * st.noise));
+          place("data", DATA, 20, -10, st.data);
+          place("need", NEED, 12, -10, st.need * ease((T - 2) / 0.15) * (1 - 0.7 * st.noise));
+
+          var text = "";
+          if (T >= 1.02 && T < 2.05) {
+            var y = clamp(Math.floor(st.year), 2019, 2026), j = y - 2019;
+            text = (y === 2026 ? "2026 so far" : y) + " · " + fmt(TOTAL[j]) + " launches · " + fmt(FEAT[j]) + " featured (" + pct(j) + "%)";
+          } else if (T >= 2.05 && T < 3.1 && st.match > 0.5) {
+            text = "everything inside the circle matches" + (st.shown > 0.5 ? " · 10 shown" : "");
+          } else if (T >= 4.85 && st.show > 0.5) {
+            text = shownN >= n - 1 ? "everything shown" : fmt(shownN) + " shown";
+          }
+          if (hud.textContent !== text) hud.textContent = text;
+        }
+
+        api.ok = true;
+        api.start = trailAt(0);
+        api.frame = frame;
+        api.project = project;
+        api.resize = function(){
+          // the dots are soft, so a bounded resolution looks the same and costs far less: at most 1.5x and about 3 million pixels
+          var d = Math.min(1.5, window.devicePixelRatio || 1), size;
+          if (W * H * d * d > 3e6) d = Math.max(1, Math.sqrt(3e6 / (W * H)));
+          size = W + "x" + H + "@" + d.toFixed(3);
+          if (size !== lastSize) { lastSize = size; dpr = d; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+          sizes = {};
+          if (W && H) fitViews();
+          force = true;
+        };
+        return api;
+      }
+      var stage = { ok: false, frame: function(){}, project: function(){ return null; }, resize: function(){} };
+
+      /* ---------- the frame: full window for the opening and the end, docked beside the text between ---------- */
+      function measure(){
+        W = stageEl.clientWidth; H = stageEl.clientHeight;
+        RF = { x: 0, y: 0, w: W, h: H };
+        if (!stage.ok) RD = { x: 0, y: 0, w: W, h: 0 };
+        else if (wide.matches) {
+          var x0 = Math.round(textEl.getBoundingClientRect().right + clamp(W * 0.04, 32, 64));
+          RD = { x: x0, y: 0, w: Math.max(0, W - x0), h: H };
+        } else RD = { x: 0, y: 0, w: W, h: Math.round(H * 0.42) };
+        rectKey = "";
+      }
+      var frameEl = document.getElementById("frame");
+      function frameRect(st){
+        var f = st.full;
+        R = { x: lerp(RD.x, RF.x, f), y: lerp(RD.y, RF.y, f), w: lerp(RD.w, RF.w, f), h: lerp(RD.h, RF.h, f) };
+        var edge = stage.ok && !wide.matches ? 1 - f : 0;
+        var key = [R.x, R.y, R.w, R.h].map(Math.round).join(",") + "|" + st.key.toFixed(3) + "|" + edge.toFixed(3);
+        if (key === rectKey) return;
+        rectKey = key;
+        stageEl.style.clipPath = "inset(" + R.y.toFixed(1) + "px " + Math.max(0, W - R.x - R.w).toFixed(1) + "px " + Math.max(0, H - R.y - R.h).toFixed(1) + "px " + R.x.toFixed(1) + "px)";
+        var s = frameEl.style;
+        s.setProperty("--rx", R.x.toFixed(1) + "px");
+        s.setProperty("--ry", R.y.toFixed(1) + "px");
+        s.setProperty("--rw", R.w.toFixed(1) + "px");
+        s.setProperty("--rh", R.h.toFixed(1) + "px");
+        s.setProperty("--key", st.key.toFixed(3));
+        s.setProperty("--edge", edge.toFixed(3));
+      }
+
+      /* ---------- the opening: your prompt, the agent's searches; then the results crumble into the space ---------- */
+      var intro = (function(){
+        var wrap = document.getElementById("intro"), chat = document.getElementById("chat"), convo = document.getElementById("convo");
+        var brand = chat.querySelector(".brand"), ask = chat.querySelector(".ask"), line = ask.querySelector(".ask-line"), txt = ask.querySelector(".ask-txt");
+        var status = document.getElementById("status"), verb = status.querySelector(".v"), count = document.getElementById("count"), noun = status.querySelector(".n");
+        var cue = wrap.querySelector(".cue"), sub = chat.querySelector(".chat-sub"), dust = document.getElementById("dust"), dc = dust.getContext("2d");
+        var fbox = document.createElement("div");
+        fbox.className = "fly fly-box";
+        document.getElementById("fliers").appendChild(fbox);
+        /* A paraphrase of your Oct 22 prompt ("I am now thinking if this doesn't already exist in some
+           form or another…"), phrased as the request it was. The agents then ran 74 web searches in four
+           minutes (17:34 to 17:38). The QUERIES below are 56 of them, word for word; the
+           rest read like news claims (acquisitions, funding) and are left out. */
+        var PROMPT = "Can you look for anything that already does what we are building, in some form or another?";
+        var SEARCHES = 74;
+        var QUERIES = [
+          "Temporal Replay 2026 AI agents announcements",
+          "temporal.io OpenAI Agents SDK integration generally available",
+          "\"agent control plane\" coding agents verification approvals audit 2026",
+          "Sourcegraph Amp 2026 announcement",
+          "Omnara OR \"Happy coder\" mobile approvals Claude Code Codex 2026",
+          "Terragon OR \"Vibe Kanban\" OR \"Imbue Sculptor\" parallel coding agents 2026",
+          "Preloop AI agent approvals Claude Code Codex MCP gateway",
+          "Charlie Labs coding agent 2026 OR Sweep AI 2026",
+          "Ona (formerly Gitpod) agents 2026 guardrails audit self-hosted",
+          "Coder agent workspaces \"Coder Tasks\" OR \"AI Bridge\" 2026 Claude Code governance",
+          "OpenAI Codex Temporal durable execution Replay 2026 talk",
+          "\"Coder Agents\" coder.com 2026 launch",
+          "\"Codex\" \"Temporal\" OpenAI built on Temporal coding agent",
+          "Augment Code remote agents 2026 \"Auggie\" OR \"Intent\"",
+          "Replit Agent Temporal case study temporal.io",
+          "temporal.io changelog 2026 AI MCP durable agents Pydantic AI integration",
+          "Augment Code Cosmos launch agent orchestration",
+          "Microsoft Agent 365 general availability agent registry governance",
+          "GitHub Copilot coding agent third-party agents Agent HQ October 2026",
+          "Okta \"AI agents\" identity governance 2026 Cross App Access agent",
+          "Sentry Seer autofix 2026 agent production fix verification",
+          "Temporal \"Claude Agent SDK\" integration temporalio",
+          "Harness AI agents 2026 \"AI SRE\" OR \"autonomous\" deploy verification announcement",
+          "Temporal MCP server durable MCP temporal.io docs 2026",
+          "Temporal AI Partner Ecosystem partners Vercel AI SDK Braintrust LangGraph integration 2026",
+          "Atlassian Rovo Dev 2026 coding agent Jira Bitbucket GA",
+          "Google Jules 2026 update OR Kiro AWS 2026 autonomous agent update",
+          "METR 2026 measuring AI agents merge-ready PRs maintainers algorithmic scoring vs review",
+          "\"Agent Trace\" spec AI code attribution Cursor git-ai provenance 2026",
+          "Jellyfish OR Faros OR DX \"AI impact\" compare coding agents cost per PR Claude Code Codex Copilot 2026",
+          "LangSmith Deployment 2026 agent server human-in-the-loop self-hosted OR \"LangSmith Fleet\"",
+          "\"Agent Client Protocol\" ACP orchestrator multiple agents 2026 Zed registry",
+          "Anthropic \"Code Review\" Claude multi-agent PR review launch 2026 OR Cursor Bugbot 2026",
+          "Restate AI agents durable execution 2026 features approvals sessions",
+          "Inngest AgentKit 2026 durable agents useAgent human in the loop",
+          "Vercel Workflow DevKit GA 2026 agents durable",
+          "Cloudflare Agents SDK Workflows sandbox 2026 durable agents",
+          "DBOS agents durable 2026 Pydantic AI OpenAI Agents",
+          "Hatchet durable tasks AI agents 2026",
+          "Trigger.dev v4 AI agents waitpoints human in the loop 2026",
+          "Amazon Bedrock AgentCore Runtime long-running 8 hours sessions Step Functions durable functions Lambda 2026",
+          "GitLab Duo Agent Platform 2026 third-party agents Claude Code Codex self-managed GA",
+          "Cursor Origin git hosting Compile 2026 announcement",
+          "Crystal Nimbalyst agent manager 2026 Stravu",
+          "AWS Lambda durable functions AI agents human approval callback GA",
+          "Temporal Workflow Update generally available changelog Nexus generally available",
+          "Temporal Replay 2026 Cursor talk background agents Temporal",
+          "engineering analytics AI agent PRs merged rate by agent Claude Code Codex Devin Faros OR Span OR Weave OR Exceeds 2026",
+          "independent verification of coding agent work different model reviewer \"cross-model\" review tool 2026",
+          "OpenHands 2026 \"OpenHands Cloud\" agent canvas enterprise launch critic verification",
+          "\"OpenHands Enterprise\" \"Agent Control Plane\" automations Claude Code Codex harness",
+          "\"amplifying.ai\" state of coding agents October 2026",
+          "Microsoft Foundry Agent Service 2026 hosted agents Claude Code GitHub Copilot agent control plane",
+          "SWE-bench Pro OR SWE-Lancer OR \"SWE-bench Live\" leaderboard 2026 agent harness comparison cost",
+          "Galileo \"Agent Control\" open source launch March 2026",
+          "Salesforce Agentforce Vibes OR \"Agentforce 4\" 2026 coding agent governance trust layer announcement"
+        ];
+        var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>';
+        var api = { ready: false }, timers = [], lastB = -1, grains = null;
+        function later(ms, f){ timers.push(setTimeout(f, ms)); }
+        function typeStr(str, done){
+          var k = 0;
+          ask.classList.add("typing", "has-text");
+          (function next(){
+            if (k >= str.length) { ask.classList.remove("typing"); done(); return; }
+            var ch = str[k++];
+            txt.textContent += ch;
+            line.scrollLeft = line.scrollWidth;
+            later(18 + Math.random() * 28 + (ch === " " ? 18 : 0), next);
+          })();
+        }
+        function tally(k){ count.textContent = k; noun.textContent = k === 1 ? "search" : "searches"; }
+        function addSearch(i){
+          var q = document.createElement("div"), s = document.createElement("span");
+          status.classList.add("on");
+          q.className = "q"; q.innerHTML = ICON; s.textContent = QUERIES[i]; q.appendChild(s);
+          convo.appendChild(q);
+          for (var k = 0; k < 2; k++) {
+            var r = document.createElement("div");
+            r.className = "r";
+            r.innerHTML = '<b class="t" style="width:' + (34 + (i * 37 + k * 23) % 44) + '%"></b><b style="width:' + (18 + (i * 53 + k * 31) % 34) + '%"></b>';
+            convo.appendChild(r);
+          }
+          convo.scrollTop = convo.scrollHeight;
+          tally(Math.round(SEARCHES * (i + 1) / QUERIES.length));
+        }
+        // sending moves the prompt into the conversation and the composer to the bottom, as chats do
+        function live(animate){
+          var els = [brand, ask], first = els.map(function(e){ return e.getBoundingClientRect(); });
+          var msg = document.createElement("p");
+          msg.className = "you-msg"; msg.textContent = PROMPT;
+          convo.appendChild(msg);
+          txt.textContent = ""; ask.classList.remove("has-text", "typing");
+          chat.classList.add("is-live");
+          if (animate && ask.animate) {
+            els.forEach(function(e, i){
+              var last = e.getBoundingClientRect(), sc = first[i].width / Math.max(1, last.width);
+              e.animate([{ transform: "translate(" + (first[i].left - last.left) + "px," + (first[i].top - last.top) + "px) scale(" + sc + ")" }, { transform: "none" }],
+                { duration: 700, easing: "cubic-bezier(.2,.7,.2,1)" });
+            });
+            msg.animate([{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], { duration: 420, delay: 320, easing: "ease-out", fill: "backwards" });
+          }
+        }
+        // the searches come faster and faster
+        function flood(i){
+          addSearch(i);
+          if (i + 1 < QUERIES.length) later(Math.max(40, 300 * Math.pow(0.88, i + 1)), function(){ flood(i + 1); });
+          else later(350, settle);
+        }
+        function settle(){
+          status.classList.add("done"); verb.textContent = "Searched the web";
+          api.ready = true; lastB = -1;
+          request();
+        }
+        function run(){
+          later(700, function(){ cue.classList.add("on"); });
+          later(900, function(){
+            typeStr(PROMPT, function(){
+              later(450, function(){
+                ask.classList.remove("press"); void ask.offsetWidth; ask.classList.add("press");
+                later(200, function(){ live(true); later(600, function(){ flood(0); }); });
+              });
+            });
+          });
+        }
+        api.start = function(){ if (reduce) api.finish(); else run(); };
+        api.finish = function(){
+          if (api.ready) return;
+          timers.forEach(clearTimeout); timers = [];
+          if (!chat.classList.contains("is-live")) live(false);
+          for (var i = convo.querySelectorAll(".q").length; i < QUERIES.length; i++) addSearch(i);
+          settle();
+          cue.classList.add("on");
+        };
+
+        /* the crumble: every visible result and query turns to grains that fall away, unevenly, left to right */
+        function gather(){
+          var wr = wrap.getBoundingClientRect(), cr = convo.getBoundingClientRect(), cs = getComputedStyle(root), seed = 7, gs = [];
+          function rnd(){ seed = seed * 16807 % 2147483647; return seed / 2147483647; }
+          var pal = { b: cs.getPropertyValue("--rule").trim(), q: cs.getPropertyValue("--ink-soft").trim(), t: cs.getPropertyValue("--signal").trim(), m: cs.getPropertyValue("--prompt").trim() };
+          var alpha = { b: 1, q: 0.5, t: 0.7, m: 0.55 };
+          convo.querySelectorAll(".r b, .q span, .you-msg").forEach(function(el){
+            var r = el.getBoundingClientRect(), bar = el.tagName === "B";
+            if (r.bottom < cr.top || r.top > cr.bottom || r.width < 1) return;
+            var kind = bar ? (el.classList.contains("t") ? "t" : "b") : el.classList.contains("you-msg") ? "m" : "q";
+            var step = bar ? 3.5 : 3, top = r.top, bottom = r.bottom;
+            if (!bar) { var pad = r.height * (kind === "m" ? 0.2 : 0.28); top += pad; bottom -= pad; }   // text: the band its letters fill
+            for (var y = top + step / 2; y < bottom; y += step) {
+              if (y < cr.top || y > cr.bottom) continue;
+              var shade = clamp((y - cr.top) / (cr.height * 0.16), 0, 1);   // the chat's own fade at the top
+              for (var x = r.left + step / 2; x < r.right; x += step)
+                gs.push({ x: x - wr.left, y: y - wr.top, k: kind, a: shade * alpha[kind], r1: rnd(), r2: rnd(), r3: rnd() });
+            }
+          });
+          gs.sort(function(a, b){ return a.k < b.k ? -1 : a.k > b.k ? 1 : 0; });
+          return { list: gs, pal: pal, x0: cr.left - wr.left, w: Math.max(1, cr.width), wr: wr, ar: ask.getBoundingClientRect(), cw: wrap.clientWidth, ch: wrap.clientHeight };
+        }
+        function drawDust(b){
+          var w = grains ? grains.cw : wrap.clientWidth, h = grains ? grains.ch : wrap.clientHeight, d = 1;
+          if (dust.width !== Math.round(w * d) || dust.height !== Math.round(h * d)) { dust.width = Math.round(w * d); dust.height = Math.round(h * d); }
+          dc.setTransform(d, 0, 0, d, 0, 0);
+          dc.clearRect(0, 0, w, h);
+          if (!grains || b <= 0 || b >= 1) return;
+          var list = grains.list, kind = "", inA = Math.min(1, b / 0.06);
+          for (var i = 0; i < list.length; i++) {
+            var p = list[i];
+            if (p.k !== kind) { kind = p.k; dc.fillStyle = grains.pal[kind]; }
+            var start = 0.03 + 0.3 * ((p.x - grains.x0) / grains.w) + 0.12 * p.r1;
+            var t = clamp((b - start) / (0.4 + 0.2 * p.r2), 0, 1);
+            var a = p.a * inA * (1 - ease((t - 0.5) / 0.5));
+            if (a <= 0.01) continue;
+            dc.globalAlpha = a;
+            dc.fillRect(p.x + (p.r3 - 0.5) * 80 * t + Math.sin(t * 5 + p.r1 * 6.283) * 9 * t,
+                        p.y + t * t * (150 + 260 * p.r2) - Math.sin(t * Math.PI) * 14 * p.r3, 1.7, 1.7);
+          }
+          dc.globalAlpha = 1;
+        }
+        api.reset = function(){ lastB = -1; grains = null; };
+        api.frame = function(T){
+          if (!api.ready) return;
+          var b = clamp((T + 1) / 0.55, 0, 1);
+          if (b === lastB) return;
+          lastB = b;
+          wrap.style.visibility = b >= 1 ? "hidden" : "";
+          if (b <= 0) {
+            convo.style.opacity = brand.style.opacity = status.style.opacity = ask.style.opacity = cue.style.opacity = sub.style.opacity = "";
+            fbox.style.opacity = 0;
+            drawDust(0);
+            return;
+          }
+          if (b >= 1) { drawDust(1); return; }
+          if (!grains) grains = gather();
+          var fade = 1 - ease(b / 0.2);
+          convo.style.opacity = 1 - Math.min(1, b / 0.06);     // the grains take its place
+          brand.style.opacity = status.style.opacity = cue.style.opacity = sub.style.opacity = fade;
+          drawDust(b);
+          // the composer, where you typed, becomes the amber dot: you
+          if (b < 0.3) { ask.style.opacity = ""; fbox.style.opacity = 0; return; }
+          ask.style.opacity = 0;
+          var wr = grains.wr, ar = grains.ar;
+          var eb = ease((b - 0.3) / 0.52), you = (stage.ok && stage.project(stage.start)) || [ar.left + ar.width / 2, ar.top + ar.height / 2];
+          var w = lerp(ar.width, 14, eb), h = lerp(ar.height, 14, eb);
+          var cx = lerp(ar.left + ar.width / 2, you[0], eb) - wr.left, cy = lerp(ar.top + ar.height / 2, you[1], eb) - wr.top;
+          fbox.style.width = w.toFixed(1) + "px"; fbox.style.height = h.toFixed(1) + "px";
+          fbox.style.transform = "translate(" + (cx - w / 2).toFixed(1) + "px," + (cy - h / 2).toFixed(1) + "px)";
+          fbox.style.setProperty("--p", ease((b - 0.45) / 0.3).toFixed(3));
+          fbox.style.opacity = 1 - ease((b - 0.82) / 0.1);
+        };
+        return api;
+      })();
+
+      /* ---------- the clock: the scroll sets where the story is, and the scene eases there ---------- */
+      var beats = [].slice.call(document.querySelectorAll("[data-t]")).map(function(el){
+        return { el: el, t: parseFloat(el.getAttribute("data-t")), line: el.hasAttribute("data-line") ? parseFloat(el.getAttribute("data-line")) : null };
+      });
+      var logItems = [].slice.call(document.querySelectorAll(".log li"));
+      var stops = [], T = null, goal = -1, raf = 0, lastNow = 0, lastCur = null;
+      // where each anchor meets its reading line, in scroll pixels; measured on layout changes, not on every scroll
+      function measureStops(){
+        var vh = window.innerHeight, def = wide.matches ? 0.52 : 0.72, y = window.scrollY;
+        stops = [{ s: 0, t: -1, el: null }].concat(beats.map(function(b){
+          return { s: b.el.getBoundingClientRect().top + y - (b.line != null ? b.line : def) * vh, t: b.t, el: b.el };
+        })).sort(function(a, b){ return a.s - b.s; });
+      }
+      // between two anchors the story moves with the scroll; with reduced motion it steps from anchor to anchor
+      function targetAt(sy){
+        var i = 0;
+        while (i + 1 < stops.length && stops[i + 1].s <= sy) i++;
+        var a = stops[i], b = stops[i + 1];
+        return { t: reduce || !b ? a.t : lerp(a.t, b.t, clamp((sy - a.s) / Math.max(1, b.s - a.s), 0, 1)), at: a };
+      }
+      function onScroll(){
+        var g = targetAt(window.scrollY);
+        goal = g.t;
+        if (goal > -1 && !intro.ready) intro.finish();
+        var cur = g.at && logItems.indexOf(g.at.el) >= 0 ? g.at.el : null;
+        if (cur !== lastCur) { logItems.forEach(function(li){ li.classList.toggle("is-current", li === cur); }); lastCur = cur; }
+        request();
+      }
+      function request(){ if (!raf) raf = requestAnimationFrame(loop); }
+      function loop(now){
+        raf = 0;
+        var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 1 / 60;
+        if (T === null || reduce) T = goal;
+        else {
+          T += (goal - T) * (1 - Math.exp(-dt / 0.14));   // a short ease: the scene follows the scroll without lagging behind it
+          if (Math.abs(goal - T) < 0.0005) T = goal;
+        }
+        var st = state(T);
+        frameRect(st);
+        stage.frame(T, st);
+        intro.frame(T);
+        if (T !== goal) { lastNow = now; request(); } else lastNow = 0;
+      }
+      function resize(){
+        measure();
+        stage.resize();
+        intro.reset();
+        measureStops();
+        onScroll();
+      }
+      // the 3D scene is built right after the first paint, so the page appears at once
+      function boot(){
+        stage = createStage();
+        measure();
+        stage.resize();
+        measureStops();
+        onScroll();
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", resize);
+      if ("ResizeObserver" in window) new ResizeObserver(function(){ measureStops(); onScroll(); }).observe(textEl);
+      onTheme.push(request);
+
+      measure();
+      measureStops();
+      goal = targetAt(window.scrollY).t;               // a reader who reloads mid-page starts where they are
+      if (goal > -1) intro.finish(); else intro.start();
+      onScroll();
+      requestAnimationFrame(function(){ setTimeout(boot, 0); });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ stage.resize(); intro.reset(); measureStops(); onScroll(); });
+    })();
+    </script>
+  </body>
+</html>
